@@ -9,12 +9,12 @@ When you open the HTML file directly (double-clicking it), the browser uses the 
 1. **Install Node.js** (if you don't have it): https://nodejs.org/
 2. **Double-click**: `start-server-node.bat` (Windows)
    - OR right-click `start-server-node.ps1` → "Run with PowerShell"
-3. **Open your browser**: `http://localhost:8000/Your Site Title.html`
+3. **Open your browser**: `http://localhost:8000/kingship concierge.html`
 
 ### Manual Start
 1. Open PowerShell or Command Prompt in this folder
 2. Run: `node server.js`
-3. Open: `http://localhost:8000/Your Site Title.html`
+3. Open: `http://localhost:8000/kingship concierge.html`
 
 ## Why This Server is Better
 The included `server.js` Node.js server:
@@ -27,13 +27,13 @@ The included `server.js` Node.js server:
 
 ### Option 2: Using Python (Basic - Has Limitations)
 1. Run: `python -m http.server 8000`
-2. Open: `http://localhost:8000/Your Site Title.html`
+2. Open: `http://localhost:8000/kingship concierge.html`
    
 **Note**: Python's server doesn't support POST requests, so you'll see 501 errors for API calls.
 
 ### Option 3: Using VS Code Live Server
 1. Install the "Live Server" extension in VS Code
-2. Right-click on `Your Site Title.html`
+2. Right-click on `kingship concierge.html`
 3. Select "Open with Live Server"
 
 ## Understanding the Errors
