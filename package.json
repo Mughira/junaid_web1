@@ -1,0 +1,13 @@
+{
+  "name": "squarespace-local-server",
+  "version": "1.0.0",
+  "description": "Local web server for Squarespace exported sites",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["squarespace", "local-server"],
+  "author": "",
+  "license": "MIT"
+}
+
