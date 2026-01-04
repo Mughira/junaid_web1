@@ -47,9 +47,21 @@
       
       @media (max-width: 799px) {
         .header-mobile-logo a picture img {
-          width: 130px !important;
+          width: 100% !important;
+          height: 120px !important;
           max-width: auto !important;
         }
+      }
+      /* Make burger menu lines white for visibility on black background */
+      .header-burger .burger-inner .top-bun,
+      .header-burger .burger-inner .patty,
+      .header-burger .burger-inner .bottom-bun {
+        background-color: black !important;
+      }
+      
+      /* Make navigation links white for visibility on black background */
+      .header-nav-item a {
+        color: white !important;
       }
     </style>
   </head>
