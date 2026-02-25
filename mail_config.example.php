@@ -4,11 +4,11 @@
  */
 return [
     'EMAIL_ENABLED'  => true,
-    'EMAIL_HOST'     => 'smtp.hostinger.com',
+    'EMAIL_HOST'     => 'smtpout.secureserver.net',
     'EMAIL_PORT'     => 465,
     'EMAIL_SECURE'   => true,
-    'EMAIL_USER'     => 'your-smtp-user@example.com',
+    'EMAIL_USER'     => 'noreply@yourdomain.com',
     'EMAIL_PASSWORD' => 'your-password',
-    'EMAIL_FROM'     => 'your-smtp-user@example.com',
+    'EMAIL_FROM'     => 'noreply@yourdomain.com',
     'EMAIL_TO'       => 'mughira.irfan17@gmail.com',
 ];
