@@ -1,6 +1,7 @@
 services:
   web:
     build: .
+    restart: unless-stopped
     ports:
       - "8080:80"
     # Optional: override mail config via env (send_email.php can be extended to read env)
