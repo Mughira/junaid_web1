@@ -11,7 +11,7 @@
     <meta http-equiv="Accept-CH"
       content="Sec-CH-UA-Platform-Version, Sec-CH-UA-Model" /><link rel="icon"
       type="image/x-icon"
-      href="https://assets.squarespace.com/universal/default-favicon.ico" />
+      href="favicon.ico" />
     <link rel="canonical" href="https://kingship.squarespace.com" />
     <meta property="og:site_name" content="Kingship Concierge" />
     <meta property="og:title" content="Kingship Concierge" />
@@ -126,6 +126,8 @@
         margin-bottom: 0.5em !important;
       }
 
+      /* Smooth scroll for anchor links (e.g. Begin Your Experience -> form) */
+      html { scroll-behavior: smooth; }
 
     </style>
   </head>
@@ -618,7 +620,7 @@
 
                       <div class="header-nav-item header-nav-item--collection">
                         <a
-                          href="/about"
+                          href="/about.html"
                           data-animation-role="header-element">
                           About
                         </a>
@@ -634,7 +636,7 @@
 
                       <div class="header-nav-item header-nav-item--collection">
                         <a
-                          href="/contact"
+                          href="/contact.html"
                           data-animation-role="header-element">
                           Contact
                         </a>
@@ -661,8 +663,8 @@
                   data-animation-role="header-element">
                   <a
                     class="btn btn--border theme-btn--primary-inverse sqs-button-element--primary"
-                    href="/contact"
-                    target="_blank">
+                    href="#contact-form-section"
+                    >
                     Contact Us
                   </a>
                 </div>
@@ -724,8 +726,8 @@
                   data-animation-role="header-element">
                   <a
                     class="btn btn--border theme-btn--primary-inverse sqs-button-element--primary"
-                    href="/contact"
-                    target="_blank">
+                    href="#contact-form-section"
+                    >
                     Contact Us
                   </a>
                 </div>
@@ -795,7 +797,7 @@
 
                       <div class="header-nav-item header-nav-item--collection">
                         <a
-                          href="/about"
+                          href="/about.html"
                           data-animation-role="header-element">
                           About
                         </a>
@@ -811,7 +813,7 @@
 
                       <div class="header-nav-item header-nav-item--collection">
                         <a
-                          href="/contact"
+                          href="/contact.html"
                           data-animation-role="header-element">
                           Contact
                         </a>
@@ -1081,7 +1083,7 @@
                     <div
                       class="container header-menu-nav-item header-menu-nav-item--collection">
                       <a
-                        href="/about">
+                        href="/about.html">
                         <div class="header-menu-nav-item-content">
                           About
                         </div>
@@ -1101,7 +1103,7 @@
                     <div
                       class="container header-menu-nav-item header-menu-nav-item--collection">
                       <a
-                        href="/contact">
+                        href="/contact.html">
                         <div class="header-menu-nav-item-content">
                           Contact
                         </div>
@@ -1115,8 +1117,8 @@
                 <div class="header-menu-cta">
                   <a
                     class="theme-btn--primary btn sqs-button-element--primary"
-                    href="/contact"
-                    target="_blank">
+                    href="#contact-form-section"
+                    >
                     Contact Us
                   </a>
                 </div>
@@ -1474,7 +1476,7 @@
                             data-button-size="medium"
                             data-button-type="primary">
                             <a
-                              href style="font-size: medium; white-space: nowrap; width: 100%; "
+                              href="#contact-form-section" style="font-size: medium; white-space: nowrap; width: 100%; "
                               class="sqs-block-button-element--medium sqs-button-element--primary sqs-block-button-element"  
                               data-sqsp-button>
                               Begin Your Experience
@@ -2058,7 +2060,7 @@
                             data-button-size="medium"
                             data-button-type="primary">
                             <a
-                              href 
+                              href="#contact-form-section"
                               class="sqs-block-button-element--medium sqs-button-element--primary sqs-block-button-element"  style="font-size: medium; white-space: nowrap; width: 100%; "
                               data-sqsp-button>
                               Begin Your Experience
@@ -2338,8 +2340,11 @@
 
                           <div class="sqs-html-content"
                             data-sqsp-text-block-content>
-                            <h2 style="white-space:pre-wrap;">Begin Your Experience</h2>
-                          </div>
+                            <a href="#contact-form-section">
+                              <h2 style="white-space:pre-wrap;">Begin Your Experience</h2>
+                          
+                            </a>
+                            </div>
 
                         </div></div></div><div
                       class="fe-block fe-block-yui_3_17_2_1_1766380206337_7029"><div
@@ -2373,7 +2378,7 @@
                               class="sqs-form-block-submission-html"
                               data-submission-html></div><style>.fe-block-yui_3_17_2_1_1766380206337_7029 {mix-blend-mode: ;
     }</style>
-
+                            <div id="contact-form-section" style="scroll-margin-top: 1.5rem;"></div>
                             <div class="form-wrapper">
                               <!-- Contact form: sent via send_email.php (SMTP to mughira.irfan17@gmail.com) -->
                               <form id="contact-form-email" class="sqs-block-form" action="send_email.php" method="POST">
@@ -3629,7 +3634,7 @@
             sqs-button-element--primary
           
         "
-                      href="/team">
+                      href="#contact-form-section">
                       BOOK NOW
                     </a>
                   </div>
@@ -4775,7 +4780,7 @@
                             data-button-size="medium"
                             data-button-type="primary">
                             <a
-                              href="/get-started"
+                              href="/get-started.html"
                               class="sqs-block-button-element--medium sqs-button-element--primary sqs-block-button-element"
                               data-sqsp-button>
                               GET A QUOTE
@@ -5136,7 +5141,7 @@
                           <p class="sqsrte-large"
                             style="white-space:pre-wrap;">Questions?</p><p class
                             style="white-space:pre-wrap;"><a
-                              href="/contact">Contact us</a> </p>
+                              href="#contact-form-section">Contact us</a> </p>
                         </div>
 
                       </div></div></div><div
@@ -5221,17 +5226,17 @@
                           data-sqsp-text-block-content>
                           <p class="sqsrte-small"
                             style="white-space:pre-wrap;"><a
-                              href="/about">About</a></p><p class="sqsrte-small"
+                              href="/about.html">About</a></p><p class="sqsrte-small"
                             style="white-space:pre-wrap;"><a
                               href="/services">Services</a></p>
                               <p
                             class="sqsrte-small"
                             style="white-space:pre-wrap;"><a
-                              href="/get-started">Get Started</a></p>
+                              href="/get-started.html">Get Started</a></p>
                               <p
                             class="sqsrte-small"
                             style="white-space:pre-wrap;"><a
-                              href="/get-started">Our Approach</a></p>
+                              href="/get-started.html">Our Approach</a></p>
                         </div>
 
                       </div>
