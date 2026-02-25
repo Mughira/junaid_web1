@@ -1,18 +1,26 @@
-# Use the official Node.js runtime as base image
-FROM node:18-alpine
+# Serve site + PHP contact form in one container
+FROM php:8.2-apache
 
-# Set working directory in container
-WORKDIR /app
+# Install Composer and deps for PHPMailer (openssl is usually already in php image)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install -j$(nproc) zip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy package.json first (for better Docker layer caching)
-COPY package.json .
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy all project files to container
+WORKDIR /var/www/html
+
+# Copy app (excluding what's in .dockerignore)
 COPY . .
 
-# Expose the port the server runs on
-EXPOSE 8000
+# Install PHP deps (PHPMailer)
+RUN composer install --no-dev --no-interaction
 
-# Start the server
-CMD ["node", "server.js"]
+# Apache serves from /var/www/html; allow .htaccess if present
+RUN a2enmod rewrite headers 2>/dev/null || true
 
+EXPOSE 80

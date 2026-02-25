@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    # Optional: override mail config via env (send_email.php can be extended to read env)
+    # environment:
+    #   - EMAIL_ENABLED=true
+    #   - EMAIL_HOST=smtp.hostinger.com
+    #   - EMAIL_PORT=465
+    #   - EMAIL_USER=sts_email@drivelu.com
+    #   - EMAIL_PASSWORD=...
+    #   - EMAIL_FROM=sts_email@drivelu.com

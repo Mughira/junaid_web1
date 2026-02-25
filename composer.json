@@ -1,0 +1,7 @@
+{
+    "name": "junaid_web1/contact-form",
+    "description": "Contact form SMTP mailer",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    }
+}
