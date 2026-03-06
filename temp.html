@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kingship — Booking Questionnaire</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --dark: #0A0A0A;
+    --dark2: #111111;
+    --dark3: #1A1A1A;
+    --dark4: #222222;
+    --text: #E8E4DC;
+    --text-dim: rgba(232,228,220,0.5);
+    --border: rgba(201,168,76,0.2);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(201,168,76,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(201,168,76,0.04) 0%, transparent 70%),
+      var(--dark);
+  }
+  .bg-layer::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Layout */
+  .wrapper {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 20px 60px;
+  }
+
+  /* Header */
+  .header {
+    width: 100%; max-width: 760px;
+    padding: 48px 0 32px;
+    text-align: center;
+    animation: fadeDown 0.8s ease both;
+  }
+  .logo-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    display: block;
+  }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(34px, 6vw, 56px);
+    font-weight: 300;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .header h1 em { font-style: italic; color: var(--gold); }
+  .gold-line {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px auto 16px;
+  }
+  .header p {
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* Stepper */
+  .stepper {
+    width: 100%; max-width: 760px;
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 40px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .step-item {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    flex: 1;
+    cursor: default;
+  }
+  .step-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--dark3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-dim);
+    transition: all 0.4s ease;
+    position: relative;
+  }
+  .step-circle .check { display: none; }
+  .step-item.active .step-circle {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-dim);
+    box-shadow: 0 0 20px rgba(201,168,76,0.2);
+  }
+  .step-item.done .step-circle {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--dark);
+  }
+  .step-item.done .step-circle .num { display: none; }
+  .step-item.done .step-circle .check { display: block; }
+  .step-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: center;
+    white-space: nowrap;
+    transition: color 0.4s;
+  }
+  .step-item.active .step-label { color: var(--gold); }
+  .step-item.done .step-label { color: var(--text-dim); }
+  .step-connector {
+    flex: 1; height: 1px;
+    background: var(--border);
+    margin: 0 -4px; margin-bottom: 28px;
+    transition: background 0.4s;
+    max-width: 60px;
+  }
+  .step-connector.done { background: var(--gold); }
+
+  /* Card */
+  .form-card {
+    width: 100%; max-width: 760px;
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .card-header {
+    padding: 32px 48px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .card-icon { font-size: 24px; }
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+  .card-subtitle {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 3px;
+  }
+  .card-body { padding: 40px 48px; }
+
+  /* Form fields */
+  .field-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    margin-bottom: 28px;
+  }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .field input, .field select, .field textarea {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: 12px 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    width: 100%;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: var(--text-dim); }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+  .field select { appearance: none; cursor: pointer; }
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '›';
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    color: var(--gold); pointer-events: none;
+    font-size: 16px;
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  /* Radio comm */
+  .comm-options {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .comm-btn {
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    background: var(--dark3);
+    border-radius: 1px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .comm-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .comm-btn.selected {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+    color: var(--gold);
+  }
+
+  /* Services step */
+  .services-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-bottom: 16px;
+  }
+  .service-card {
+    border: 1px solid var(--border);
+    background: var(--dark3);
+    border-radius: 2px;
+    padding: 28px 20px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--gold-dim);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .service-card:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-2px); }
+  .service-card.selected {
+    border-color: var(--gold);
+    box-shadow: 0 0 30px rgba(201,168,76,0.12);
+  }
+  .service-card.selected::before { opacity: 1; }
+  .service-card .s-icon { font-size: 32px; margin-bottom: 12px; display: block; }
+  .service-card .s-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .service-card .s-desc {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .service-card .s-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s;
+    font-size: 10px;
+  }
+  .service-card.selected .s-check { opacity: 1; }
+
+  /* Section separator */
+  .section-sep {
+    display: flex; align-items: center; gap: 16px;
+    margin: 32px 0 24px;
+  }
+  .section-sep span {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+  .section-sep::before, .section-sep::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--border);
+  }
+
+  /* Checkbox options */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .check-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    background: var(--dark3);
+    border-radius: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .check-item:hover { border-color: rgba(201,168,76,0.4); }
+  .check-item.selected { border-color: var(--gold); background: var(--gold-dim); }
+  .check-item input[type="checkbox"] { display: none; }
+  .custom-check {
+    width: 16px; height: 16px; min-width: 16px;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 10px;
+    color: var(--dark);
+  }
+  .check-item.selected .custom-check {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .check-item span {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+  .check-item.selected span { color: var(--text); }
+
+  /* Radio pills */
+  .radio-grid {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 20px;
+  }
+  .radio-pill {
+    padding: 9px 18px;
+    border: 1px solid var(--border);
+    background: var(--dark3);
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .radio-pill:hover { border-color: rgba(201,168,76,0.4); }
+  .radio-pill.selected {
+    border-color: var(--gold);
+    background: var(--gold-dim);
+    color: var(--gold);
+  }
+
+  /* Navigation */
+  .nav-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 28px 48px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border-radius: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+    outline: none;
+    border: none;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--dark);
+    border: 1px solid var(--gold);
+  }
+  .btn-primary:hover {
+    background: var(--gold-light);
+    border-color: var(--gold-light);
+    box-shadow: 0 0 30px rgba(201,168,76,0.3);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* Progress indicator */
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    width: 100%;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Step panels */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; animation: panelIn 0.4s ease both; }
+
+  /* Success */
+  .success-wrap {
+    text-align: center; padding: 60px 48px;
+    display: none;
+  }
+  .success-wrap.show { display: block; animation: fadeUp 0.6s ease both; }
+  .success-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 24px;
+    animation: pulse 2s ease infinite;
+  }
+  .success-wrap h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; font-weight: 300;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .success-wrap p {
+    font-size: 12px; font-weight: 300;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    line-height: 2;
+  }
+  .success-wrap .gold-line { margin: 24px auto; }
+
+  /* Notifications */
+  .notif {
+    position: fixed; bottom: 30px; right: 30px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text);
+    border-radius: 1px;
+    z-index: 999;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 320px;
+  }
+  .notif.show { transform: translateX(0); }
+
+  /* Animations */
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+  @keyframes panelIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.3); } 50% { box-shadow: 0 0 0 12px rgba(201,168,76,0); } }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .card-header, .card-body, .nav-row { padding-left: 24px; padding-right: 24px; }
+    .field-row, .field-row.triple { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .stepper { gap: 0; }
+    .step-label { font-size: 7px; letter-spacing: 1px; }
+    .step-connector { max-width: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <span class="logo-mark">Kingship</span>
+    <h1>Booking <em>Questionnaire</em></h1>
+    <div class="gold-line"></div>
+    <p>Where Every Journey Becomes an Experience</p>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper" id="stepper">
+    <div class="step-item active" data-step="1">
+      <div class="step-circle"><span class="num">1</span><span class="check">✓</span></div>
+      <div class="step-label">Profile</div>
+    </div>
+    <div class="step-connector" id="conn-1"></div>
+    <div class="step-item" data-step="2">
+      <div class="step-circle"><span class="num">2</span><span class="check">✓</span></div>
+      <div class="step-label">Services</div>
+    </div>
+    <div class="step-connector" id="conn-2"></div>
+    <div class="step-item" data-step="3">
+      <div class="step-circle"><span class="num">3</span><span class="check">✓</span></div>
+      <div class="step-label">Details</div>
+    </div>
+    <div class="step-connector" id="conn-3"></div>
+    <div class="step-item" data-step="4">
+      <div class="step-circle"><span class="num">4</span><span class="check">✓</span></div>
+      <div class="step-label">Confirm</div>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:25%"></div></div>
+
+    <form id="mainForm" novalidate>
+
+      <!-- STEP 1: Client Profile -->
+      <div class="step-panel active" id="panel-1">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Client Profile</div>
+            <div class="card-subtitle">Your Personal Details</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Full Name *</label>
+              <input type="text" id="fullName" name="fullName" placeholder="Your full name" required>
+            </div>
+            <div class="field">
+              <label>Company Name</label>
+              <input type="text" id="company" name="company" placeholder="If applicable">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Phone / WhatsApp *</label>
+              <input type="tel" id="phone" name="phone" placeholder="+1 000 000 0000" required>
+            </div>
+            <div class="field">
+              <label>Email Address *</label>
+              <input type="email" id="email" name="email" placeholder="your@email.com" required>
+            </div>
+          </div>
+          <div class="field-row full">
+            <div class="field">
+              <label>Preferred Communication</label>
+              <div class="comm-options">
+                <div class="comm-btn" onclick="selectComm(this, 'Call')">Call</div>
+                <div class="comm-btn" onclick="selectComm(this, 'WhatsApp')">WhatsApp</div>
+                <div class="comm-btn" onclick="selectComm(this, 'Email')">Email</div>
+              </div>
+              <input type="hidden" id="commMethod" name="commMethod">
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <span></span>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Service Selection -->
+      <div class="step-panel" id="panel-2">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Select Services</div>
+            <div class="card-subtitle">Choose One or More</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="services-grid">
+            <div class="service-card" onclick="toggleService(this, 'chauffeur')" data-service="chauffeur">
+              <span class="s-icon">🚘</span>
+              <div class="s-name">Chauffeur</div>
+              <div class="s-desc">Executive Transfer</div>
+              <div class="s-check">✓</div>
+            </div>
+            <div class="service-card" onclick="toggleService(this, 'yacht')" data-service="yacht">
+              <span class="s-icon">🛥</span>
+              <div class="s-name">Yacht Charter</div>
+              <div class="s-desc">Private Waters</div>
+              <div class="s-check">✓</div>
+            </div>
+            <div class="service-card" onclick="toggleService(this, 'partybus')" data-service="partybus">
+              <span class="s-icon">🎉</span>
+              <div class="s-name">Party Bus</div>
+              <div class="s-desc">Mobile Celebration</div>
+              <div class="s-check">✓</div>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--text-dim);letter-spacing:1px;text-align:center;">Select all services you require. You may choose multiple.</p>
+          <input type="hidden" id="selectedServices" name="selectedServices">
+        </div>
+        <div class="nav-row">
+          <button type="button" class="btn btn-ghost" onclick="prevStep()">&larr; Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Service Details -->
+      <div class="step-panel" id="panel-3">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Booking Details</div>
+            <div class="card-subtitle">Tell Us More About Your Requirements</div>
+          </div>
+        </div>
+        <div class="card-body" id="detailsBody">
+          <!-- Injected dynamically -->
+        </div>
+        <div class="nav-row">
+          <button type="button" class="btn btn-ghost" onclick="prevStep()">&larr; Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Review &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Review & Submit -->
+      <div class="step-panel" id="panel-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Review & Submit</div>
+            <div class="card-subtitle">Confirm Your Booking Details</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="reviewContent"></div>
+          <div class="field-row full" style="margin-top:24px;">
+            <div class="field">
+              <label>Additional Notes</label>
+              <textarea name="additionalNotes" id="additionalNotes" placeholder="Any other requests or special instructions…"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button type="button" class="btn btn-ghost" onclick="prevStep()">&larr; Back</button>
+          <button type="button" class="btn btn-primary" onclick="submitForm()" id="submitBtn">Submit Booking ✦</button>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="success-wrap" id="successWrap">
+        <div class="success-icon">✦</div>
+        <h2>Booking <em style="font-style:italic;color:var(--gold)">Received</em></h2>
+        <div class="gold-line"></div>
+        <p>Thank you for choosing Kingship.<br>Our concierge team will contact you<br>within 2 hours to confirm your reservation.</p>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<!-- Notification -->
+<div class="notif" id="notif"></div>
+
+<script>
+// ——— State ———
+let currentStep = 1;
+const totalSteps = 4;
+const selectedServices = new Set();
+const formData = {};
+
+// ——— Comm method ———
+function selectComm(el, val) {
+  document.querySelectorAll('.comm-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('commMethod').value = val;
+}
+
+// ——— Service toggle ———
+function toggleService(el, name) {
+  el.classList.toggle('selected');
+  if (selectedServices.has(name)) selectedServices.delete(name);
+  else selectedServices.add(name);
+  document.getElementById('selectedServices').value = [...selectedServices].join(',');
+}
+
+// ——— Radio/Checkbox helpers ———
+function makeRadioGroup(name, options, required) {
+  return `<div class="radio-grid" id="rg-${name}">
+    ${options.map(o => `<div class="radio-pill" onclick="selectRadio(this,'${name}','${o}')">${o}</div>`).join('')}
+  </div><input type="hidden" name="${name}" id="rv-${name}" ${required ? 'data-required' : ''}>`;
+}
+
+function selectRadio(el, name, val) {
+  el.closest('.radio-grid').querySelectorAll('.radio-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('rv-' + name).value = val;
+}
+
+function makeCheckGroup(name, options) {
+  return `<div class="check-grid">
+    ${options.map(o => `<div class="check-item" onclick="toggleCheck(this,'${name}','${o}')">
+      <div class="custom-check" id="cc-${name}-${o.replace(/\s+/g,'_')}"></div>
+      <span>${o}</span>
+    </div>`).join('')}
+  </div><input type="hidden" name="${name}" id="cv-${name}">`;
+}
+
+function toggleCheck(el, name, val) {
+  el.classList.toggle('selected');
+  const inp = document.getElementById('cv-' + name);
+  const vals = inp.value ? inp.value.split(',') : [];
+  if (el.classList.contains('selected')) { vals.push(val); el.querySelector('.custom-check').textContent = '✓'; }
+  else { const i = vals.indexOf(val); if (i > -1) vals.splice(i,1); el.querySelector('.custom-check').textContent = ''; }
+  inp.value = vals.join(',');
+}
+
+// ——— Build details panel ———
+function buildDetails() {
+  const body = document.getElementById('detailsBody');
+  if (selectedServices.size === 0) { body.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:20px;">Please go back and select at least one service.</p>'; return; }
+
+  let html = '';
+
+  if (selectedServices.has('chauffeur')) {
+    html += `<div class="section-sep"><span>🚘 Chauffeur Service</span></div>
+    <div class="field-row">
+      <div class="field"><label>Service Date *</label><input type="date" name="c_date" required></div>
+      <div class="field"><label>Pickup Time *</label><input type="time" name="c_time" required></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Pickup Address *</label><input type="text" name="c_pickup" placeholder="Full address" required></div>
+      <div class="field"><label>Drop-off Address *</label><input type="text" name="c_dropoff" placeholder="Destination" required></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Service Type</label>${makeRadioGroup('c_serviceType', ['One-Way','Round Trip','Hourly','Full-Day','Multi-Day'])}</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Vehicle Category</label>${makeRadioGroup('c_vehicle', ['Luxury Sedan','Executive SUV','VIP Van','Limousine'])}</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Passengers</label><input type="number" name="c_pax" placeholder="Number" min="1"></div>
+      <div class="field"><label>Luggage Count</label><input type="number" name="c_luggage" placeholder="Number" min="0"></div>
+    </div>
+    <div class="field-row full">
+      <div class="field"><label>Purpose of Booking</label>${makeRadioGroup('c_purpose', ['Airport Transfer','Corporate Travel','Wedding','City Tour','VIP Protocol','Other'])}</div>
+    </div>
+    <div class="field-row full">
+      <div class="field"><label>Special Requirements</label>${makeCheckGroup('c_special', ['Child Seat','Wheelchair Access','VIP Privacy','Security Personnel'])}</div>
+    </div>`;
+  }
+
+  if (selectedServices.has('yacht')) {
+    html += `<div class="section-sep"><span>🛥 Yacht Charter</span></div>
+    <div class="field-row">
+      <div class="field"><label>Charter Date *</label><input type="date" name="y_date" required></div>
+      <div class="field"><label>Boarding Time *</label><input type="time" name="y_time" required></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Charter Duration</label>${makeRadioGroup('y_duration', ['2 Hours','4 Hours','6 Hours','Full Day'])}</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Departure Marina *</label><input type="text" name="y_marina" placeholder="Marina / location"></div>
+      <div class="field"><label>Number of Guests *</label><input type="number" name="y_guests" placeholder="Total guests" min="1"></div>
+    </div>
+    <div class="field-row full">
+      <div class="field"><label>Occasion</label>${makeRadioGroup('y_occasion', ['Birthday','Proposal','Wedding','Corporate','Private Party','Leisure Cruise','Other'])}</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Preferred Yacht Size</label><input type="text" name="y_size" placeholder="e.g. 40ft, 60ft+"></div>
+      <div class="field"><label>Estimated Budget</label><input type="text" name="y_budget" placeholder="e.g. $5,000–$10,000"></div>
+    </div>
+    <div class="field-row full">
+      <div class="field"><label>Onboard Enhancements</label>${makeCheckGroup('y_extras', ['Private DJ','Premium Catering','Live BBQ','Luxury Decorations','Water Sports','Photographer','Premium Beverages'])}</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Theme / Decoration Vision</label><input type="text" name="y_theme" placeholder="Describe your vision"></div>
+      <div class="field"><label>Dietary Requirements</label><input type="text" name="y_diet" placeholder="Allergies, preferences"></div>
+    </div>`;
+  }
+
+  if (selectedServices.has('partybus')) {
+    html += `<div class="section-sep"><span>🎉 Party Bus</span></div>
+    <div class="field-row">
+      <div class="field"><label>Event Date *</label><input type="date" name="p_date" required></div>
+      <div class="field"><label>Pickup Time *</label><input type="time" name="p_time" required></div>
+    </div>
+    <div class="field-row full">
+      <div class="field"><label>Event Type</label>${makeRadioGroup('p_eventType', ['Birthday Party','Bachelor/Bachelorette','Prom Night','Wedding Transfer','Corporate Event','Night Out','Concert/Festival','Other'])}</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Pickup Location *</label><input type="text" name="p_pickup" placeholder="Address"></div>
+      <div class="field"><label>Drop-off Location</label><input type="text" name="p_dropoff" placeholder="Address"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Duration (hours)</label><input type="number" name="p_duration" placeholder="Hours" min="1"></div>
+      <div class="field"><label>Number of Guests *</label><input type="number" name="p_guests" placeholder="Total guests" min="1"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Age Group</label>${makeRadioGroup('p_age', ['Under 18','18-21','21+'])}</div>
+      <div class="field"><label>Bus Size</label>${makeRadioGroup('p_busSize', ['15-20 pax','20-30 pax','30+ pax'])}</div>
+    </div>
+    <div class="field-row full">
+      <div class="field"><label>Entertainment & Add-Ons</label>${makeCheckGroup('p_extras', ['Photographer/Videographer','Themed Decorations','Balloon Setup','Champagne Service','Security Personnel'])}</div>
+    </div>
+    <div class="field-row full">
+      <div class="field"><label>Additional Stops</label>${makeRadioGroup('p_stops', ['No Additional Stops','Yes – I will list them in notes'])}</div>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+}
+
+// ——— Review panel ———
+function buildReview() {
+  const svcLabels = { chauffeur:'🚘 Chauffeur Service', yacht:'🛥 Yacht Charter', partybus:'🎉 Party Bus' };
+  let html = `<div style="margin-bottom:20px;">
+    <p style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Selected Services</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${[...selectedServices].map(s => `<span style="padding:8px 16px;background:var(--gold-dim);border:1px solid var(--gold);border-radius:1px;font-size:11px;color:var(--gold);letter-spacing:1px;">${svcLabels[s]}</span>`).join('')}
+    </div>
+  </div>
+  <div style="background:var(--dark3);border:1px solid var(--border);border-radius:1px;padding:20px;">
+    <p style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">Client Details</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      ${makeReviewRow('Name', document.getElementById('fullName')?.value)}
+      ${makeReviewRow('Phone', document.getElementById('phone')?.value)}
+      ${makeReviewRow('Email', document.getElementById('email')?.value)}
+      ${makeReviewRow('Communication', document.getElementById('commMethod')?.value)}
+    </div>
+  </div>`;
+  document.getElementById('reviewContent').innerHTML = html;
+}
+
+function makeReviewRow(label, val) {
+  if (!val) return '';
+  return `<div>
+    <p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:3px;">${label}</p>
+    <p style="font-size:13px;font-weight:300;color:var(--text);">${val}</p>
+  </div>`;
+}
+
+// ——— Validation ———
+function validateStep(step) {
+  if (step === 1) {
+    const name = document.getElementById('fullName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!name) { showNotif('Please enter your full name.'); return false; }
+    if (!phone) { showNotif('Please enter your phone number.'); return false; }
+    if (!email || !email.includes('@')) { showNotif('Please enter a valid email address.'); return false; }
+  }
+  if (step === 2) {
+    if (selectedServices.size === 0) { showNotif('Please select at least one service.'); return false; }
+  }
+  if (step === 3) {
+    const req = document.querySelectorAll('#panel-3 [required]');
+    for (const f of req) {
+      if (!f.value.trim()) {
+        showNotif('Please fill in all required fields.');
+        f.focus();
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+// ——— Navigation ———
+function nextStep() {
+  if (!validateStep(currentStep)) return;
+  if (currentStep === totalSteps) return;
+
+  updateStepper(currentStep, 'done');
+  currentStep++;
+
+  if (currentStep === 3) buildDetails();
+  if (currentStep === 4) buildReview();
+
+  showPanel(currentStep);
+  updateProgress();
+  updateStepper(currentStep, 'active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevStep() {
+  if (currentStep === 1) return;
+  updateStepper(currentStep, '');
+  currentStep--;
+  showPanel(currentStep);
+  updateProgress();
+  updateStepper(currentStep, 'active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showPanel(step) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('panel-' + step);
+  if (panel) panel.classList.add('active');
+}
+
+function updateProgress() {
+  document.getElementById('progress').style.width = (currentStep / totalSteps * 100) + '%';
+}
+
+function updateStepper(step, state) {
+  const item = document.querySelector(`.step-item[data-step="${step}"]`);
+  if (!item) return;
+  item.classList.remove('active', 'done');
+  if (state) item.classList.add(state);
+
+  const conn = document.getElementById('conn-' + (step - 1));
+  if (conn) {
+    if (state === 'done') conn.classList.add('done');
+    else conn.classList.remove('done');
+  }
+}
+
+// ——— Submit ———
+async function submitForm() {
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+
+  // Collect all form data
+  const data = {};
+  const inputs = document.querySelectorAll('#mainForm input, #mainForm select, #mainForm textarea');
+  inputs.forEach(inp => {
+    if (inp.name && inp.value) data[inp.name] = inp.value;
+  });
+  data['services'] = [...selectedServices].join(', ');
+
+  const WEBHOOK_URL = 'YOUR_GOHIGHLEVEL_WEBHOOK_URL_HERE';
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      body: JSON.stringify(data)
+    });
+
+    // Show success
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('stepper').style.opacity = '0.3';
+    document.getElementById('successWrap').classList.add('show');
+    document.querySelector('.progress-fill').style.width = '100%';
+
+  } catch (err) {
+    showNotif('Something went wrong. Please try again.');
+    btn.textContent = 'Submit Booking ✦';
+    btn.disabled = false;
+  }
+}
+
+// ——— Notif ———
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 3500);
+}
+
+// Init
+updateStepper(1, 'active');
+</script>
+</body>
+</html>

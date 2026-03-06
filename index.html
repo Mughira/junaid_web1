@@ -2380,35 +2380,736 @@
     }</style>
                             <div id="contact-form-section" style="scroll-margin-top: 1.5rem;"></div>
                             <div class="form-wrapper">
-                              <!-- Contact form: sent via send_email.php (SMTP to mughira.irfan17@gmail.com) -->
-                              <form id="contact-form-email" class="sqs-block-form" action="send_email.php" method="POST">
-                                <div class="field-list">
-                                  <fieldset class="field name required">
-                                    <label for="contact-name">Name</label>
-                                    <input id="contact-name" name="name" type="text" required placeholder=" " autocomplete="name">
-                                  </fieldset>
-                                  <fieldset class="field email required">
-                                    <label for="contact-email">Email</label>
-                                    <input id="contact-email" name="email" type="email" required placeholder=" " autocomplete="email">
-                                  </fieldset>
-                                  <fieldset class="field phone">
-                                    <label for="contact-phone">Phone</label>
-                                    <input id="contact-phone" name="phone" type="tel" placeholder=" " autocomplete="tel">
-                                  </fieldset>
-                                  <fieldset class="field text required">
-                                    <label for="contact-subject">Subject</label>
-                                    <input id="contact-subject" name="subject" type="text" required placeholder=" ">
-                                  </fieldset>
-                                  <fieldset class="field textarea required">
-                                    <label for="contact-message">Message</label>
-                                    <textarea id="contact-message" name="message" required placeholder=" " rows="4"></textarea>
-                                  </fieldset>
+                              <!-- Kingship Booking Questionnaire -->
+                              <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+                              <style>
+                                .bq-wrap *, .bq-wrap *::before, .bq-wrap *::after { box-sizing: border-box; margin: 0; padding: 0; }
+                                .bq-wrap {
+                                  --bq-gold: #C9A84C;
+                                  --bq-gold-light: #E8C97A;
+                                  --bq-gold-dim: rgba(201,168,76,0.15);
+                                  --bq-dark: #0A0A0A;
+                                  --bq-dark2: #111111;
+                                  --bq-dark3: #1A1A1A;
+                                  --bq-dark4: #222222;
+                                  --bq-text: #E8E4DC;
+                                  --bq-text-dim: rgba(232,228,220,0.5);
+                                  --bq-border: rgba(201,168,76,0.2);
+                                  font-family: 'Montserrat', sans-serif;
+                                  color: var(--bq-text);
+                                  position: relative;
+                                }
+                                .bq-wrap .bq-bg-layer {
+                                  position: absolute; inset: 0; z-index: 0;
+                                  background:
+                                    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(201,168,76,0.06) 0%, transparent 70%),
+                                    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(201,168,76,0.04) 0%, transparent 70%),
+                                    var(--bq-dark);
+                                  border-radius: 2px;
+                                }
+                                .bq-wrap .bq-bg-layer::after {
+                                  content: '';
+                                  position: absolute; inset: 0;
+                                  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                                }
+                                .bq-wrap .bq-wrapper {
+                                  position: relative; z-index: 1;
+                                  display: flex; flex-direction: column; align-items: center;
+                                  padding: 0 20px 60px;
+                                }
+                                .bq-wrap .bq-header {
+                                  width: 100%; max-width: 760px;
+                                  padding: 48px 0 32px;
+                                  text-align: center;
+                                  animation: bqFadeDown 0.8s ease both;
+                                }
+                                .bq-wrap .bq-logo-mark {
+                                  font-family: 'Cormorant Garamond', serif;
+                                  font-size: 11px; font-weight: 400;
+                                  letter-spacing: 8px; text-transform: uppercase;
+                                  color: var(--bq-gold); margin-bottom: 12px; display: block;
+                                }
+                                .bq-wrap .bq-header h1 {
+                                  font-family: 'Cormorant Garamond', serif;
+                                  font-size: clamp(34px, 6vw, 56px); font-weight: 300;
+                                  letter-spacing: 2px; line-height: 1.1; color: var(--bq-text);
+                                }
+                                .bq-wrap .bq-header h1 em { font-style: italic; color: var(--bq-gold); }
+                                .bq-wrap .bq-gold-line {
+                                  width: 60px; height: 1px;
+                                  background: linear-gradient(90deg, transparent, var(--bq-gold), transparent);
+                                  margin: 20px auto 16px;
+                                }
+                                .bq-wrap .bq-header p {
+                                  font-size: 11px; font-weight: 300;
+                                  letter-spacing: 3px; text-transform: uppercase;
+                                  color: var(--bq-text-dim);
+                                }
+                                .bq-wrap .bq-stepper {
+                                  width: 100%; max-width: 760px;
+                                  display: flex; align-items: center; gap: 0;
+                                  margin-bottom: 40px;
+                                  animation: bqFadeUp 0.8s 0.2s ease both;
+                                }
+                                .bq-wrap .bq-step-item {
+                                  display: flex; flex-direction: column; align-items: center; gap: 8px;
+                                  flex: 1; cursor: default;
+                                }
+                                .bq-wrap .bq-step-circle {
+                                  width: 40px; height: 40px; border-radius: 50%;
+                                  border: 1px solid var(--bq-border); background: var(--bq-dark3);
+                                  display: flex; align-items: center; justify-content: center;
+                                  font-family: 'Cormorant Garamond', serif;
+                                  font-size: 16px; font-weight: 500; color: var(--bq-text-dim);
+                                  transition: all 0.4s ease; position: relative;
+                                }
+                                .bq-wrap .bq-step-circle .bq-check { display: none; }
+                                .bq-wrap .bq-step-item.active .bq-step-circle {
+                                  border-color: var(--bq-gold); color: var(--bq-gold);
+                                  background: var(--bq-gold-dim); box-shadow: 0 0 20px rgba(201,168,76,0.2);
+                                }
+                                .bq-wrap .bq-step-item.done .bq-step-circle {
+                                  border-color: var(--bq-gold); background: var(--bq-gold); color: var(--bq-dark);
+                                }
+                                .bq-wrap .bq-step-item.done .bq-step-circle .bq-num { display: none; }
+                                .bq-wrap .bq-step-item.done .bq-step-circle .bq-check { display: block; }
+                                .bq-wrap .bq-step-label {
+                                  font-size: 9px; font-weight: 600; letter-spacing: 2px;
+                                  text-transform: uppercase; color: var(--bq-text-dim);
+                                  text-align: center; white-space: nowrap; transition: color 0.4s;
+                                }
+                                .bq-wrap .bq-step-item.active .bq-step-label { color: var(--bq-gold); }
+                                .bq-wrap .bq-step-item.done .bq-step-label { color: var(--bq-text-dim); }
+                                .bq-wrap .bq-step-connector {
+                                  flex: 1; height: 1px; background: var(--bq-border);
+                                  margin: 0 -4px; margin-bottom: 28px; transition: background 0.4s; max-width: 60px;
+                                }
+                                .bq-wrap .bq-step-connector.done { background: var(--bq-gold); }
+                                .bq-wrap .bq-form-card {
+                                  width: 100%; max-width: 760px;
+                                  background: var(--bq-dark2); border: 1px solid var(--bq-border);
+                                  border-radius: 2px; overflow: hidden;
+                                  animation: bqFadeUp 0.8s 0.3s ease both;
+                                }
+                                .bq-wrap .bq-card-header {
+                                  padding: 32px 48px 28px; border-bottom: 1px solid var(--bq-border);
+                                  display: flex; align-items: center; gap: 16px;
+                                }
+                                .bq-wrap .bq-card-title {
+                                  font-family: 'Cormorant Garamond', serif;
+                                  font-size: 24px; font-weight: 400; letter-spacing: 1px; color: var(--bq-text);
+                                }
+                                .bq-wrap .bq-card-subtitle {
+                                  font-size: 10px; font-weight: 400; letter-spacing: 3px;
+                                  text-transform: uppercase; color: var(--bq-text-dim); margin-top: 3px;
+                                }
+                                .bq-wrap .bq-card-body { padding: 40px 48px; }
+                                .bq-wrap .bq-field-row {
+                                  display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px;
+                                }
+                                .bq-wrap .bq-field-row.bq-full { grid-template-columns: 1fr; }
+                                .bq-wrap .bq-field-row.bq-triple { grid-template-columns: 1fr 1fr 1fr; }
+                                .bq-wrap .bq-field { display: flex; flex-direction: column; gap: 8px; }
+                                .bq-wrap .bq-field label {
+                                  font-size: 9px; font-weight: 600; letter-spacing: 3px;
+                                  text-transform: uppercase; color: var(--bq-gold);
+                                }
+                                .bq-wrap .bq-field input, .bq-wrap .bq-field select, .bq-wrap .bq-field textarea {
+                                  background: var(--bq-dark3); border: 1px solid var(--bq-border);
+                                  border-radius: 1px; padding: 12px 16px;
+                                  font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 300;
+                                  color: var(--bq-text); outline: none;
+                                  transition: border-color 0.3s, box-shadow 0.3s; width: 100%;
+                                }
+                                .bq-wrap .bq-field input::placeholder, .bq-wrap .bq-field textarea::placeholder { color: var(--bq-text-dim); }
+                                .bq-wrap .bq-field input:focus, .bq-wrap .bq-field select:focus, .bq-wrap .bq-field textarea:focus {
+                                  border-color: var(--bq-gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+                                }
+                                .bq-wrap .bq-field select { appearance: none; cursor: pointer; }
+                                .bq-wrap .bq-select-wrap { position: relative; }
+                                .bq-wrap .bq-select-wrap::after {
+                                  content: '\203A'; position: absolute; right: 14px; top: 50%;
+                                  transform: translateY(-50%) rotate(90deg);
+                                  color: var(--bq-gold); pointer-events: none; font-size: 16px;
+                                }
+                                .bq-wrap .bq-field textarea { resize: vertical; min-height: 80px; }
+                                .bq-wrap .bq-comm-options { display: flex; gap: 12px; flex-wrap: wrap; }
+                                .bq-wrap .bq-comm-btn {
+                                  padding: 10px 20px; border: 1px solid var(--bq-border);
+                                  background: var(--bq-dark3); border-radius: 1px;
+                                  font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500;
+                                  letter-spacing: 1.5px; text-transform: uppercase;
+                                  color: var(--bq-text-dim); cursor: pointer; transition: all 0.25s;
+                                }
+                                .bq-wrap .bq-comm-btn:hover { border-color: var(--bq-gold); color: var(--bq-gold); }
+                                .bq-wrap .bq-comm-btn.selected {
+                                  border-color: var(--bq-gold); background: var(--bq-gold-dim); color: var(--bq-gold);
+                                }
+                                .bq-wrap .bq-services-grid {
+                                  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;
+                                }
+                                .bq-wrap .bq-service-card {
+                                  border: 1px solid var(--bq-border); background: var(--bq-dark3);
+                                  border-radius: 2px; padding: 28px 20px; cursor: pointer;
+                                  text-align: center; transition: all 0.3s ease;
+                                  position: relative; overflow: hidden;
+                                }
+                                .bq-wrap .bq-service-card::before {
+                                  content: ''; position: absolute; inset: 0;
+                                  background: var(--bq-gold-dim); opacity: 0; transition: opacity 0.3s;
+                                }
+                                .bq-wrap .bq-service-card:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-2px); }
+                                .bq-wrap .bq-service-card.selected {
+                                  border-color: var(--bq-gold); box-shadow: 0 0 30px rgba(201,168,76,0.12);
+                                }
+                                .bq-wrap .bq-service-card.selected::before { opacity: 1; }
+                                .bq-wrap .bq-service-card .bq-s-icon { font-size: 32px; margin-bottom: 12px; display: block; }
+                                .bq-wrap .bq-service-card .bq-s-name {
+                                  font-family: 'Cormorant Garamond', serif;
+                                  font-size: 18px; font-weight: 400; color: var(--bq-text); margin-bottom: 6px;
+                                }
+                                .bq-wrap .bq-service-card .bq-s-desc {
+                                  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+                                  color: var(--bq-text-dim); font-weight: 400;
+                                }
+                                .bq-wrap .bq-service-card .bq-s-check {
+                                  position: absolute; top: 12px; right: 12px;
+                                  width: 20px; height: 20px; border-radius: 50%;
+                                  background: var(--bq-gold); display: flex; align-items: center; justify-content: center;
+                                  opacity: 0; transition: opacity 0.3s; font-size: 10px;
+                                }
+                                .bq-wrap .bq-service-card.selected .bq-s-check { opacity: 1; }
+                                .bq-wrap .bq-section-sep {
+                                  display: flex; align-items: center; gap: 16px; margin: 32px 0 24px;
+                                }
+                                .bq-wrap .bq-section-sep span {
+                                  font-size: 9px; font-weight: 600; letter-spacing: 3px;
+                                  text-transform: uppercase; color: var(--bq-gold); white-space: nowrap;
+                                }
+                                .bq-wrap .bq-section-sep::before, .bq-wrap .bq-section-sep::after {
+                                  content: ''; flex: 1; height: 1px; background: var(--bq-border);
+                                }
+                                .bq-wrap .bq-check-grid {
+                                  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                                  gap: 10px; margin-bottom: 20px;
+                                }
+                                .bq-wrap .bq-check-item {
+                                  display: flex; align-items: center; gap: 10px;
+                                  padding: 10px 14px; border: 1px solid var(--bq-border);
+                                  background: var(--bq-dark3); border-radius: 1px; cursor: pointer; transition: all 0.2s;
+                                }
+                                .bq-wrap .bq-check-item:hover { border-color: rgba(201,168,76,0.4); }
+                                .bq-wrap .bq-check-item.selected { border-color: var(--bq-gold); background: var(--bq-gold-dim); }
+                                .bq-wrap .bq-check-item input[type="checkbox"] { display: none; }
+                                .bq-wrap .bq-custom-check {
+                                  width: 16px; height: 16px; min-width: 16px;
+                                  border: 1px solid var(--bq-border); border-radius: 1px;
+                                  display: flex; align-items: center; justify-content: center;
+                                  transition: all 0.2s; font-size: 10px; color: var(--bq-dark);
+                                }
+                                .bq-wrap .bq-check-item.selected .bq-custom-check {
+                                  background: var(--bq-gold); border-color: var(--bq-gold);
+                                }
+                                .bq-wrap .bq-check-item span {
+                                  font-size: 11px; font-weight: 400; letter-spacing: 0.5px;
+                                  color: var(--bq-text-dim); transition: color 0.2s;
+                                }
+                                .bq-wrap .bq-check-item.selected span { color: var(--bq-text); }
+                                .bq-wrap .bq-radio-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+                                .bq-wrap .bq-radio-pill {
+                                  padding: 9px 18px; border: 1px solid var(--bq-border);
+                                  background: var(--bq-dark3); border-radius: 50px;
+                                  font-size: 11px; font-weight: 400; color: var(--bq-text-dim);
+                                  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+                                }
+                                .bq-wrap .bq-radio-pill:hover { border-color: rgba(201,168,76,0.4); }
+                                .bq-wrap .bq-radio-pill.selected {
+                                  border-color: var(--bq-gold); background: var(--bq-gold-dim); color: var(--bq-gold);
+                                }
+                                .bq-wrap .bq-nav-row {
+                                  display: flex; justify-content: space-between; align-items: center;
+                                  padding: 28px 48px; border-top: 1px solid var(--bq-border);
+                                }
+                                .bq-wrap .bq-btn {
+                                  font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 600;
+                                  letter-spacing: 3px; text-transform: uppercase; padding: 14px 32px;
+                                  border-radius: 1px; cursor: pointer; transition: all 0.3s; outline: none; border: none;
+                                }
+                                .bq-wrap .bq-btn-ghost {
+                                  background: transparent; border: 1px solid var(--bq-border); color: var(--bq-text-dim);
+                                }
+                                .bq-wrap .bq-btn-ghost:hover { border-color: var(--bq-gold); color: var(--bq-gold); }
+                                .bq-wrap .bq-btn-primary {
+                                  background: var(--bq-gold); color: var(--bq-dark); border: 1px solid var(--bq-gold);
+                                }
+                                .bq-wrap .bq-btn-primary:hover {
+                                  background: var(--bq-gold-light); border-color: var(--bq-gold-light);
+                                  box-shadow: 0 0 30px rgba(201,168,76,0.3); transform: translateY(-1px);
+                                }
+                                .bq-wrap .bq-btn-primary:active { transform: translateY(0); }
+                                .bq-wrap .bq-progress-bar { height: 2px; background: var(--bq-border); width: 100%; }
+                                .bq-wrap .bq-progress-fill {
+                                  height: 100%;
+                                  background: linear-gradient(90deg, var(--bq-gold), var(--bq-gold-light));
+                                  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                                }
+                                .bq-wrap .bq-step-panel { display: none; }
+                                .bq-wrap .bq-step-panel.active { display: block; animation: bqPanelIn 0.4s ease both; }
+                                .bq-wrap .bq-success-wrap {
+                                  text-align: center; padding: 60px 48px; display: none;
+                                }
+                                .bq-wrap .bq-success-wrap.show { display: block; animation: bqFadeUp 0.6s ease both; }
+                                .bq-wrap .bq-success-icon {
+                                  width: 72px; height: 72px; border-radius: 50%;
+                                  background: var(--bq-gold-dim); border: 1px solid var(--bq-gold);
+                                  display: flex; align-items: center; justify-content: center;
+                                  font-size: 28px; margin: 0 auto 24px; animation: bqPulse 2s ease infinite;
+                                }
+                                .bq-wrap .bq-success-wrap h2 {
+                                  font-family: 'Cormorant Garamond', serif;
+                                  font-size: 36px; font-weight: 300; margin-bottom: 12px; color: var(--bq-text);
+                                }
+                                .bq-wrap .bq-success-wrap p {
+                                  font-size: 12px; font-weight: 300; letter-spacing: 2px;
+                                  text-transform: uppercase; color: var(--bq-text-dim); line-height: 2;
+                                }
+                                .bq-wrap .bq-notif {
+                                  position: fixed; bottom: 30px; right: 30px;
+                                  background: var(--bq-dark3); border: 1px solid var(--bq-border);
+                                  border-left: 3px solid var(--bq-gold); padding: 16px 24px;
+                                  font-size: 12px; font-weight: 400; color: var(--bq-text);
+                                  border-radius: 1px; z-index: 999;
+                                  transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                                  max-width: 320px;
+                                }
+                                .bq-wrap .bq-notif.show { transform: translateX(0); }
+                                @keyframes bqFadeDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:none; } }
+                                @keyframes bqFadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+                                @keyframes bqPanelIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+                                @keyframes bqPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.3); } 50% { box-shadow: 0 0 0 12px rgba(201,168,76,0); } }
+                                @media (max-width: 640px) {
+                                  .bq-wrap .bq-card-header, .bq-wrap .bq-card-body, .bq-wrap .bq-nav-row { padding-left: 24px; padding-right: 24px; }
+                                  .bq-wrap .bq-field-row, .bq-wrap .bq-field-row.bq-triple { grid-template-columns: 1fr; }
+                                  .bq-wrap .bq-services-grid { grid-template-columns: 1fr; }
+                                  .bq-wrap .bq-stepper { gap: 0; }
+                                  .bq-wrap .bq-step-label { font-size: 7px; letter-spacing: 1px; }
+                                  .bq-wrap .bq-step-connector { max-width: 30px; }
+                                }
+                              </style>
+
+                              <div class="bq-wrap">
+                                <div class="bq-bg-layer"></div>
+                                <div class="bq-wrapper">
+
+                                  <!-- Header -->
+                                  <div class="bq-header">
+                                    <span class="bq-logo-mark">Kingship</span>
+                                    <h1>Booking <em>Questionnaire</em></h1>
+                                    <div class="bq-gold-line"></div>
+                                    <p>Where Every Journey Becomes an Experience</p>
+                                  </div>
+
+                                  <!-- Stepper -->
+                                  <div class="bq-stepper" id="bq-stepper">
+                                    <div class="bq-step-item active" data-step="1">
+                                      <div class="bq-step-circle"><span class="bq-num">1</span><span class="bq-check">&#10003;</span></div>
+                                      <div class="bq-step-label">Profile</div>
+                                    </div>
+                                    <div class="bq-step-connector" id="bq-conn-1"></div>
+                                    <div class="bq-step-item" data-step="2">
+                                      <div class="bq-step-circle"><span class="bq-num">2</span><span class="bq-check">&#10003;</span></div>
+                                      <div class="bq-step-label">Services</div>
+                                    </div>
+                                    <div class="bq-step-connector" id="bq-conn-2"></div>
+                                    <div class="bq-step-item" data-step="3">
+                                      <div class="bq-step-circle"><span class="bq-num">3</span><span class="bq-check">&#10003;</span></div>
+                                      <div class="bq-step-label">Details</div>
+                                    </div>
+                                    <div class="bq-step-connector" id="bq-conn-3"></div>
+                                    <div class="bq-step-item" data-step="4">
+                                      <div class="bq-step-circle"><span class="bq-num">4</span><span class="bq-check">&#10003;</span></div>
+                                      <div class="bq-step-label">Confirm</div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Form Card -->
+                                  <div class="bq-form-card">
+                                    <div class="bq-progress-bar"><div class="bq-progress-fill" id="bq-progress" style="width:25%"></div></div>
+
+                                    <form id="bq-mainForm" novalidate>
+
+                                      <!-- STEP 1: Client Profile -->
+                                      <div class="bq-step-panel active" id="bq-panel-1">
+                                        <div class="bq-card-header">
+                                          <div>
+                                            <div class="bq-card-title">Client Profile</div>
+                                            <div class="bq-card-subtitle">Your Personal Details</div>
+                                          </div>
+                                        </div>
+                                        <div class="bq-card-body">
+                                          <div class="bq-field-row">
+                                            <div class="bq-field">
+                                              <label>Full Name *</label>
+                                              <input type="text" id="bq-fullName" name="fullName" placeholder="Your full name" required>
+                                            </div>
+                                            <div class="bq-field">
+                                              <label>Company Name</label>
+                                              <input type="text" id="bq-company" name="company" placeholder="If applicable">
+                                            </div>
+                                          </div>
+                                          <div class="bq-field-row">
+                                            <div class="bq-field">
+                                              <label>Phone / WhatsApp *</label>
+                                              <input type="tel" id="bq-phone" name="phone" placeholder="+1 000 000 0000" required>
+                                            </div>
+                                            <div class="bq-field">
+                                              <label>Email Address *</label>
+                                              <input type="email" id="bq-email" name="email" placeholder="your@email.com" required>
+                                            </div>
+                                          </div>
+                                          <div class="bq-field-row bq-full">
+                                            <div class="bq-field">
+                                              <label>Preferred Communication</label>
+                                              <div class="bq-comm-options">
+                                                <div class="bq-comm-btn" onclick="bqSelectComm(this, 'Call')">Call</div>
+                                                <div class="bq-comm-btn" onclick="bqSelectComm(this, 'WhatsApp')">WhatsApp</div>
+                                                <div class="bq-comm-btn" onclick="bqSelectComm(this, 'Email')">Email</div>
+                                              </div>
+                                              <input type="hidden" id="bq-commMethod" name="commMethod">
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="bq-nav-row">
+                                          <span></span>
+                                          <button type="button" class="bq-btn bq-btn-primary" onclick="bqNextStep()">Continue &rarr;</button>
+                                        </div>
+                                      </div>
+
+                                      <!-- STEP 2: Service Selection -->
+                                      <div class="bq-step-panel" id="bq-panel-2">
+                                        <div class="bq-card-header">
+                                          <div>
+                                            <div class="bq-card-title">Select Services</div>
+                                            <div class="bq-card-subtitle">Choose One or More</div>
+                                          </div>
+                                        </div>
+                                        <div class="bq-card-body">
+                                          <div class="bq-services-grid">
+                                            <div class="bq-service-card" onclick="bqToggleService(this, 'chauffeur')" data-service="chauffeur">
+                                              <span class="bq-s-icon">&#128664;</span>
+                                              <div class="bq-s-name">Chauffeur</div>
+                                              <div class="bq-s-desc">Executive Transfer</div>
+                                              <div class="bq-s-check">&#10003;</div>
+                                            </div>
+                                            <div class="bq-service-card" onclick="bqToggleService(this, 'yacht')" data-service="yacht">
+                                              <span class="bq-s-icon">&#128741;</span>
+                                              <div class="bq-s-name">Yacht Charter</div>
+                                              <div class="bq-s-desc">Private Waters</div>
+                                              <div class="bq-s-check">&#10003;</div>
+                                            </div>
+                                            <div class="bq-service-card" onclick="bqToggleService(this, 'partybus')" data-service="partybus">
+                                              <span class="bq-s-icon">&#127881;</span>
+                                              <div class="bq-s-name">Party Bus</div>
+                                              <div class="bq-s-desc">Mobile Celebration</div>
+                                              <div class="bq-s-check">&#10003;</div>
+                                            </div>
+                                          </div>
+                                          <p style="font-size:11px;color:var(--bq-text-dim);letter-spacing:1px;text-align:center;">Select all services you require. You may choose multiple.</p>
+                                          <input type="hidden" id="bq-selectedServices" name="selectedServices">
+                                        </div>
+                                        <div class="bq-nav-row">
+                                          <button type="button" class="bq-btn bq-btn-ghost" onclick="bqPrevStep()">&larr; Back</button>
+                                          <button type="button" class="bq-btn bq-btn-primary" onclick="bqNextStep()">Continue &rarr;</button>
+                                        </div>
+                                      </div>
+
+                                      <!-- STEP 3: Service Details -->
+                                      <div class="bq-step-panel" id="bq-panel-3">
+                                        <div class="bq-card-header">
+                                          <div>
+                                            <div class="bq-card-title">Booking Details</div>
+                                            <div class="bq-card-subtitle">Tell Us More About Your Requirements</div>
+                                          </div>
+                                        </div>
+                                        <div class="bq-card-body" id="bq-detailsBody">
+                                          <!-- Injected dynamically -->
+                                        </div>
+                                        <div class="bq-nav-row">
+                                          <button type="button" class="bq-btn bq-btn-ghost" onclick="bqPrevStep()">&larr; Back</button>
+                                          <button type="button" class="bq-btn bq-btn-primary" onclick="bqNextStep()">Review &rarr;</button>
+                                        </div>
+                                      </div>
+
+                                      <!-- STEP 4: Review & Submit -->
+                                      <div class="bq-step-panel" id="bq-panel-4">
+                                        <div class="bq-card-header">
+                                          <div>
+                                            <div class="bq-card-title">Review & Submit</div>
+                                            <div class="bq-card-subtitle">Confirm Your Booking Details</div>
+                                          </div>
+                                        </div>
+                                        <div class="bq-card-body">
+                                          <div id="bq-reviewContent"></div>
+                                          <div class="bq-field-row bq-full" style="margin-top:24px;">
+                                            <div class="bq-field">
+                                              <label>Additional Notes</label>
+                                              <textarea name="additionalNotes" id="bq-additionalNotes" placeholder="Any other requests or special instructions..."></textarea>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="bq-nav-row">
+                                          <button type="button" class="bq-btn bq-btn-ghost" onclick="bqPrevStep()">&larr; Back</button>
+                                          <button type="button" class="bq-btn bq-btn-primary" onclick="bqSubmitForm()" id="bq-submitBtn">Submit Booking &#10022;</button>
+                                        </div>
+                                      </div>
+
+                                      <!-- Success -->
+                                      <div class="bq-success-wrap" id="bq-successWrap">
+                                        <div class="bq-success-icon">&#10022;</div>
+                                        <h2>Booking <em style="font-style:italic;color:var(--bq-gold)">Received</em></h2>
+                                        <div class="bq-gold-line"></div>
+                                        <p>Thank you for choosing Kingship.<br>Our concierge team will contact you<br>within 2 hours to confirm your reservation.</p>
+                                      </div>
+
+                                    </form>
+                                <div class="bq-notif" id="bq-notif"></div>
+                                  </div>
+
                                 </div>
-                                <div class="form-button-wrapper">
-                                  <input type="submit" class="button sqs-button-element--primary" value="Submit">
-                                </div>
-                                <div id="form-submit-status" class="form-submission-message" style="display:none; margin-top:1em;"></div>
-                              </form>
+                                <!-- Notification -->
+                              </div>
+
+                              <script>
+                              // ——— Booking Questionnaire State ———
+                              (function() {
+                                let bqCurrentStep = 1;
+                                const bqTotalSteps = 4;
+                                const bqSelectedServices = new Set();
+
+                                // ——— Comm method ———
+                                window.bqSelectComm = function(el, val) {
+                                  document.querySelectorAll('.bq-comm-btn').forEach(b => b.classList.remove('selected'));
+                                  el.classList.add('selected');
+                                  document.getElementById('bq-commMethod').value = val;
+                                };
+
+                                // ——— Service toggle ———
+                                window.bqToggleService = function(el, name) {
+                                  el.classList.toggle('selected');
+                                  if (bqSelectedServices.has(name)) bqSelectedServices.delete(name);
+                                  else bqSelectedServices.add(name);
+                                  document.getElementById('bq-selectedServices').value = [...bqSelectedServices].join(',');
+                                };
+
+                                // ——— Radio/Checkbox helpers ———
+                                function bqMakeRadioGroup(name, options, required) {
+                                  return '<div class="bq-radio-grid" id="bq-rg-' + name + '">' +
+                                    options.map(function(o) { return '<div class="bq-radio-pill" onclick="bqSelectRadio(this,\'' + name + '\',\'' + o + '\')">' + o + '</div>'; }).join('') +
+                                    '</div><input type="hidden" name="' + name + '" id="bq-rv-' + name + '"' + (required ? ' data-required' : '') + '>';
+                                }
+
+                                window.bqSelectRadio = function(el, name, val) {
+                                  el.closest('.bq-radio-grid').querySelectorAll('.bq-radio-pill').forEach(function(p) { p.classList.remove('selected'); });
+                                  el.classList.add('selected');
+                                  document.getElementById('bq-rv-' + name).value = val;
+                                };
+
+                                function bqMakeCheckGroup(name, options) {
+                                  return '<div class="bq-check-grid">' +
+                                    options.map(function(o) { return '<div class="bq-check-item" onclick="bqToggleCheck(this,\'' + name + '\',\'' + o + '\')"><div class="bq-custom-check" id="bq-cc-' + name + '-' + o.replace(/\s+/g,'_') + '"></div><span>' + o + '</span></div>'; }).join('') +
+                                    '</div><input type="hidden" name="' + name + '" id="bq-cv-' + name + '">';
+                                }
+
+                                window.bqToggleCheck = function(el, name, val) {
+                                  el.classList.toggle('selected');
+                                  var inp = document.getElementById('bq-cv-' + name);
+                                  var vals = inp.value ? inp.value.split(',') : [];
+                                  if (el.classList.contains('selected')) { vals.push(val); el.querySelector('.bq-custom-check').textContent = '\u2713'; }
+                                  else { var i = vals.indexOf(val); if (i > -1) vals.splice(i,1); el.querySelector('.bq-custom-check').textContent = ''; }
+                                  inp.value = vals.join(',');
+                                };
+
+                                // ——— Build details panel ———
+                                function bqBuildDetails() {
+                                  var body = document.getElementById('bq-detailsBody');
+                                  if (bqSelectedServices.size === 0) { body.innerHTML = '<p style="color:var(--bq-text-dim);text-align:center;padding:20px;">Please go back and select at least one service.</p>'; return; }
+
+                                  var html = '';
+
+                                  if (bqSelectedServices.has('chauffeur')) {
+                                    html += '<div class="bq-section-sep"><span>&#128664; Chauffeur Service</span></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Service Date *</label><input type="date" name="c_date" required></div><div class="bq-field"><label>Pickup Time *</label><input type="time" name="c_time" required></div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Pickup Address *</label><input type="text" name="c_pickup" placeholder="Full address" required></div><div class="bq-field"><label>Drop-off Address *</label><input type="text" name="c_dropoff" placeholder="Destination" required></div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Service Type</label>' + bqMakeRadioGroup('c_serviceType', ['One-Way','Round Trip','Hourly','Full-Day','Multi-Day']) + '</div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Vehicle Category</label>' + bqMakeRadioGroup('c_vehicle', ['Luxury Sedan','Executive SUV','VIP Van','Limousine']) + '</div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Passengers</label><input type="number" name="c_pax" placeholder="Number" min="1"></div><div class="bq-field"><label>Luggage Count</label><input type="number" name="c_luggage" placeholder="Number" min="0"></div></div>' +
+                                    '<div class="bq-field-row bq-full"><div class="bq-field"><label>Purpose of Booking</label>' + bqMakeRadioGroup('c_purpose', ['Airport Transfer','Corporate Travel','Wedding','City Tour','VIP Protocol','Other']) + '</div></div>' +
+                                    '<div class="bq-field-row bq-full"><div class="bq-field"><label>Special Requirements</label>' + bqMakeCheckGroup('c_special', ['Child Seat','Wheelchair Access','VIP Privacy','Security Personnel']) + '</div></div>';
+                                  }
+
+                                  if (bqSelectedServices.has('yacht')) {
+                                    html += '<div class="bq-section-sep"><span>&#128741; Yacht Charter</span></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Charter Date *</label><input type="date" name="y_date" required></div><div class="bq-field"><label>Boarding Time *</label><input type="time" name="y_time" required></div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Charter Duration</label>' + bqMakeRadioGroup('y_duration', ['2 Hours','4 Hours','6 Hours','Full Day']) + '</div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Departure Marina *</label><input type="text" name="y_marina" placeholder="Marina / location"></div><div class="bq-field"><label>Number of Guests *</label><input type="number" name="y_guests" placeholder="Total guests" min="1"></div></div>' +
+                                    '<div class="bq-field-row bq-full"><div class="bq-field"><label>Occasion</label>' + bqMakeRadioGroup('y_occasion', ['Birthday','Proposal','Wedding','Corporate','Private Party','Leisure Cruise','Other']) + '</div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Preferred Yacht Size</label><input type="text" name="y_size" placeholder="e.g. 40ft, 60ft+"></div><div class="bq-field"><label>Estimated Budget</label><input type="text" name="y_budget" placeholder="e.g. $5,000-$10,000"></div></div>' +
+                                    '<div class="bq-field-row bq-full"><div class="bq-field"><label>Onboard Enhancements</label>' + bqMakeCheckGroup('y_extras', ['Private DJ','Premium Catering','Live BBQ','Luxury Decorations','Water Sports','Photographer','Premium Beverages']) + '</div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Theme / Decoration Vision</label><input type="text" name="y_theme" placeholder="Describe your vision"></div><div class="bq-field"><label>Dietary Requirements</label><input type="text" name="y_diet" placeholder="Allergies, preferences"></div></div>';
+                                  }
+
+                                  if (bqSelectedServices.has('partybus')) {
+                                    html += '<div class="bq-section-sep"><span>&#127881; Party Bus</span></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Event Date *</label><input type="date" name="p_date" required></div><div class="bq-field"><label>Pickup Time *</label><input type="time" name="p_time" required></div></div>' +
+                                    '<div class="bq-field-row bq-full"><div class="bq-field"><label>Event Type</label>' + bqMakeRadioGroup('p_eventType', ['Birthday Party','Bachelor/Bachelorette','Prom Night','Wedding Transfer','Corporate Event','Night Out','Concert/Festival','Other']) + '</div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Pickup Location *</label><input type="text" name="p_pickup" placeholder="Address"></div><div class="bq-field"><label>Drop-off Location</label><input type="text" name="p_dropoff" placeholder="Address"></div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Duration (hours)</label><input type="number" name="p_duration" placeholder="Hours" min="1"></div><div class="bq-field"><label>Number of Guests *</label><input type="number" name="p_guests" placeholder="Total guests" min="1"></div></div>' +
+                                    '<div class="bq-field-row"><div class="bq-field"><label>Age Group</label>' + bqMakeRadioGroup('p_age', ['Under 18','18-21','21+']) + '</div><div class="bq-field"><label>Bus Size</label>' + bqMakeRadioGroup('p_busSize', ['15-20 pax','20-30 pax','30+ pax']) + '</div></div>' +
+                                    '<div class="bq-field-row bq-full"><div class="bq-field"><label>Entertainment & Add-Ons</label>' + bqMakeCheckGroup('p_extras', ['Photographer/Videographer','Themed Decorations','Balloon Setup','Champagne Service','Security Personnel']) + '</div></div>' +
+                                    '<div class="bq-field-row bq-full"><div class="bq-field"><label>Additional Stops</label>' + bqMakeRadioGroup('p_stops', ['No Additional Stops','Yes - I will list them in notes']) + '</div></div>';
+                                  }
+
+                                  body.innerHTML = html;
+                                }
+
+                                // ——— Review panel ———
+                                function bqBuildReview() {
+                                  var svcLabels = { chauffeur:'&#128664; Chauffeur Service', yacht:'&#128741; Yacht Charter', partybus:'&#127881; Party Bus' };
+                                  var html = '<div style="margin-bottom:20px;">' +
+                                    '<p style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--bq-gold);margin-bottom:12px;">Selected Services</p>' +
+                                    '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+                                    [...bqSelectedServices].map(function(s) { return '<span style="padding:8px 16px;background:var(--bq-gold-dim);border:1px solid var(--bq-gold);border-radius:1px;font-size:11px;color:var(--bq-gold);letter-spacing:1px;">' + svcLabels[s] + '</span>'; }).join('') +
+                                    '</div></div>' +
+                                    '<div style="background:var(--bq-dark3);border:1px solid var(--bq-border);border-radius:1px;padding:20px;">' +
+                                    '<p style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--bq-gold);margin-bottom:12px;">Client Details</p>' +
+                                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+                                    bqMakeReviewRow('Name', document.getElementById('bq-fullName').value) +
+                                    bqMakeReviewRow('Phone', document.getElementById('bq-phone').value) +
+                                    bqMakeReviewRow('Email', document.getElementById('bq-email').value) +
+                                    bqMakeReviewRow('Communication', document.getElementById('bq-commMethod').value) +
+                                    '</div></div>';
+                                  document.getElementById('bq-reviewContent').innerHTML = html;
+                                }
+
+                                function bqMakeReviewRow(label, val) {
+                                  if (!val) return '';
+                                  return '<div><p style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--bq-text-dim);margin-bottom:3px;">' + label + '</p><p style="font-size:13px;font-weight:300;color:var(--bq-text);">' + val + '</p></div>';
+                                }
+
+                                // ——— Validation ———
+                                function bqValidateStep(step) {
+                                  if (step === 1) {
+                                    var name = document.getElementById('bq-fullName').value.trim();
+                                    var phone = document.getElementById('bq-phone').value.trim();
+                                    var email = document.getElementById('bq-email').value.trim();
+                                    if (!name) { bqShowNotif('Please enter your full name.'); return false; }
+                                    if (!phone) { bqShowNotif('Please enter your phone number.'); return false; }
+                                    if (!email || email.indexOf('@') === -1) { bqShowNotif('Please enter a valid email address.'); return false; }
+                                  }
+                                  if (step === 2) {
+                                    if (bqSelectedServices.size === 0) { bqShowNotif('Please select at least one service.'); return false; }
+                                  }
+                                  if (step === 3) {
+                                    var req = document.querySelectorAll('#bq-panel-3 [required]');
+                                    for (var idx = 0; idx < req.length; idx++) {
+                                      if (!req[idx].value.trim()) {
+                                        bqShowNotif('Please fill in all required fields.');
+                                        req[idx].focus();
+                                        return false;
+                                      }
+                                    }
+                                  }
+                                  return true;
+                                }
+
+                                // ——— Navigation ———
+                                window.bqNextStep = function() {
+                                  if (!bqValidateStep(bqCurrentStep)) return;
+                                  if (bqCurrentStep === bqTotalSteps) return;
+                                  bqUpdateStepper(bqCurrentStep, 'done');
+                                  bqCurrentStep++;
+                                  if (bqCurrentStep === 3) bqBuildDetails();
+                                  if (bqCurrentStep === 4) bqBuildReview();
+                                  bqShowPanel(bqCurrentStep);
+                                  bqUpdateProgress();
+                                  bqUpdateStepper(bqCurrentStep, 'active');
+                                  document.querySelector('.bq-wrap').scrollIntoView({ behavior: 'smooth' });
+                                };
+
+                                window.bqPrevStep = function() {
+                                  if (bqCurrentStep === 1) return;
+                                  bqUpdateStepper(bqCurrentStep, '');
+                                  bqCurrentStep--;
+                                  bqShowPanel(bqCurrentStep);
+                                  bqUpdateProgress();
+                                  bqUpdateStepper(bqCurrentStep, 'active');
+                                  document.querySelector('.bq-wrap').scrollIntoView({ behavior: 'smooth' });
+                                };
+
+                                function bqShowPanel(step) {
+                                  document.querySelectorAll('.bq-step-panel').forEach(function(p) { p.classList.remove('active'); });
+                                  var panel = document.getElementById('bq-panel-' + step);
+                                  if (panel) panel.classList.add('active');
+                                }
+
+                                function bqUpdateProgress() {
+                                  document.getElementById('bq-progress').style.width = (bqCurrentStep / bqTotalSteps * 100) + '%';
+                                }
+
+                                function bqUpdateStepper(step, state) {
+                                  var item = document.querySelector('.bq-step-item[data-step="' + step + '"]');
+                                  if (!item) return;
+                                  item.classList.remove('active', 'done');
+                                  if (state) item.classList.add(state);
+                                  var conn = document.getElementById('bq-conn-' + (step - 1));
+                                  if (conn) {
+                                    if (state === 'done') conn.classList.add('done');
+                                    else conn.classList.remove('done');
+                                  }
+                                }
+
+                                // ——— Submit ———
+                                window.bqSubmitForm = async function() {
+                                  var btn = document.getElementById('bq-submitBtn');
+                                  btn.textContent = 'Submitting\u2026';
+                                  btn.disabled = true;
+                                  var data = {};
+                                  var inputs = document.querySelectorAll('#bq-mainForm input, #bq-mainForm select, #bq-mainForm textarea');
+                                  inputs.forEach(function(inp) { if (inp.name && inp.value) data[inp.name] = inp.value; });
+                                  data['services'] = [...bqSelectedServices].join(', ');
+
+                                  var WEBHOOK_URL = 'YOUR_GOHIGHLEVEL_WEBHOOK_URL_HERE';
+
+                                  try {
+                                    await fetch(WEBHOOK_URL, {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      mode: 'no-cors',
+                                      body: JSON.stringify(data)
+                                    });
+                                    document.querySelectorAll('.bq-step-panel').forEach(function(p) { p.classList.remove('active'); });
+                                    document.getElementById('bq-stepper').style.opacity = '0.3';
+                                    document.getElementById('bq-successWrap').classList.add('show');
+                                    document.querySelector('.bq-progress-fill').style.width = '100%';
+                                  } catch (err) {
+                                    bqShowNotif('Something went wrong. Please try again.');
+                                    btn.textContent = 'Submit Booking \u2726';
+                                    btn.disabled = false;
+                                  }
+                                };
+
+                                // ——— Notif ———
+                                function bqShowNotif(msg) {
+                                  var n = document.getElementById('bq-notif');
+                                  n.textContent = msg;
+                                  n.classList.add('show');
+                                  setTimeout(function() { n.classList.remove('show'); }, 3500);
+                                }
+
+                                // Init
+                                bqUpdateStepper(1, 'active');
+                              })();
+                              </script>
                             </div>
                           </div></div></div></div><div
                       class="fe-block fe-block-e2ae207e385a93e8d0bd"><div
