@@ -119,6 +119,27 @@ select:focus{border-color:var(--gold)}
 .confirm-dialog p{font-size:14px;color:var(--text-dim);margin-bottom:20px}
 .confirm-dialog .btns{display:flex;gap:12px;justify-content:center}
 
+/* Payment Dialog */
+.payment-dialog{background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:32px;max-width:420px;width:90%}
+.payment-dialog h3{font-size:18px;margin-bottom:4px;color:var(--text)}
+.payment-dialog .pay-subtitle{font-size:13px;color:var(--text-dim);margin-bottom:20px}
+.payment-dialog .pay-to{font-size:14px;color:var(--gold);margin-bottom:20px;padding:12px;background:var(--dark3);border-radius:8px;display:flex;align-items:center;gap:10px}
+.payment-dialog .pay-to .pay-name{font-weight:600;color:var(--text)}
+.payment-dialog .pay-to .pay-email{font-size:12px;color:var(--text-dim)}
+.pay-field{margin-bottom:16px}
+.pay-field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.pay-field input,.pay-field textarea{width:100%;padding:12px 16px;background:var(--dark3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:15px;outline:none;transition:border-color .2s;font-family:inherit}
+.pay-field input:focus,.pay-field textarea:focus{border-color:var(--gold)}
+.pay-field input::placeholder,.pay-field textarea::placeholder{color:var(--text-dim)}
+.pay-field .amount-input{position:relative}
+.pay-field .amount-input span{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:18px;font-weight:600}
+.pay-field .amount-input input{padding-left:32px;font-size:20px;font-weight:600}
+.pay-field textarea{resize:vertical;min-height:60px;font-size:14px}
+.payment-dialog .btns{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+.btn-stripe{background:linear-gradient(135deg,#C9A84C,#E8C97A);color:var(--dark);border:none;font-weight:700;letter-spacing:.3px}
+.btn-stripe:hover{background:linear-gradient(135deg,#E8C97A,#C9A84C);color:var(--dark)}
+.btn-stripe:disabled{opacity:.5;cursor:not-allowed}
+
 /* Responsive */
 @media(max-width:900px){
   .stats{grid-template-columns:repeat(2,1fr);padding:16px}
@@ -186,6 +207,35 @@ select:focus{border-color:var(--gold)}
     <div class="btns">
       <button class="btn" onclick="closeConfirm()">Cancel</button>
       <button class="btn btn-danger" id="confirmBtn" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="paymentOverlay">
+  <div class="payment-dialog">
+    <h3>Send Payment Link</h3>
+    <p class="pay-subtitle">A Stripe payment link will be emailed to the customer</p>
+    <div class="pay-to">
+      <div>
+        <div class="pay-name" id="payName"></div>
+        <div class="pay-email" id="payEmail"></div>
+      </div>
+    </div>
+    <div class="pay-field">
+      <label>Amount (USD)</label>
+      <div class="amount-input">
+        <span>$</span>
+        <input type="number" id="payAmount" placeholder="0.00" min="1" step="0.01">
+      </div>
+    </div>
+    <div class="pay-field">
+      <label>Description (optional)</label>
+      <textarea id="payDescription" placeholder="e.g. Yacht Charter - March 15th"></textarea>
+    </div>
+    <div class="btns">
+      <button class="btn" onclick="closePayment()">Cancel</button>
+      <button class="btn" id="payCopyBtn" onclick="copyPaymentLink()">Copy Link</button>
+      <button class="btn btn-stripe" id="paySubmitBtn" onclick="submitPayment()">Send &amp; Email</button>
     </div>
   </div>
 </div>
@@ -280,6 +330,7 @@ function renderCards() {
           <option value="contacted" ${c.status==='contacted'?'selected':''}>Contacted</option>
           <option value="completed" ${c.status==='completed'?'selected':''}>Completed</option>
         </select>
+        <button class="btn btn-gold" onclick="openPayment(${c.id}, '${esc(c.fullName)}', '${esc(c.email)}')">$ Payment</button>
         <button class="btn btn-danger" onclick="askDelete(${c.id}, '${esc(c.fullName)}')">Delete</button>
       </div>
     </div>`;
@@ -409,6 +460,84 @@ function showToast(msg, type) {
   t.className = 'toast show ' + (type || 'success');
   setTimeout(() => t.className = 'toast', 2500);
 }
+
+// --- Payment ---
+let payContactId = null;
+
+function openPayment(id, name, email) {
+  payContactId = id;
+  document.getElementById('payName').textContent = name;
+  document.getElementById('payEmail').textContent = email;
+  document.getElementById('payAmount').value = '';
+  document.getElementById('payDescription').value = '';
+  document.getElementById('paySubmitBtn').disabled = false;
+  document.getElementById('paySubmitBtn').textContent = 'Send Payment Link';
+  document.getElementById('paymentOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('payAmount').focus(), 100);
+}
+
+function closePayment() {
+  document.getElementById('paymentOverlay').classList.remove('show');
+  payContactId = null;
+}
+
+async function submitPayment() {
+  const amount = parseFloat(document.getElementById('payAmount').value);
+  const description = document.getElementById('payDescription').value.trim();
+  if (!amount || amount <= 0) return showToast('Enter a valid amount', 'error');
+
+  const btn = document.getElementById('paySubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    const res = await fetch('/api/send-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contactId: payContactId, amount, description })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    closePayment();
+    showToast('Payment link sent to ' + document.getElementById('payEmail').textContent);
+  } catch (err) {
+    showToast(err.message || 'Failed to send payment link', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Send Payment Link';
+  }
+}
+
+async function copyPaymentLink() {
+  const amount = parseFloat(document.getElementById('payAmount').value);
+  const description = document.getElementById('payDescription').value.trim();
+  if (!amount || amount <= 0) return showToast('Enter a valid amount', 'error');
+
+  const btn = document.getElementById('payCopyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+
+  try {
+    const res = await fetch('/api/create-payment-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contactId: payContactId, amount, description })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    await navigator.clipboard.writeText(data.paymentUrl);
+    closePayment();
+    showToast('Payment link copied to clipboard!');
+  } catch (err) {
+    showToast(err.message || 'Failed to create payment link', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Copy Link';
+  }
+}
+
+// Close payment overlay on outside click
+document.getElementById('paymentOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePayment();
+});
 
 // Debounced search
 let searchTimeout;

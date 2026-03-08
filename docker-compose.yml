@@ -4,6 +4,6 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:OZNUHHFLjybIoxnvt6Hl@107.155.122.35:5432/kingship
+    env_file:
+      - .env
 

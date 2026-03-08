@@ -3,6 +3,17 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const db = require('./db');
+const Stripe = require('stripe');
+const nodemailer = require('nodemailer');
+
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+
+const mailTransporter = process.env.SMTP_HOST ? nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT) || 465,
+  secure: true,
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+}) : null;
 
 const PORT = 8000;
 const BASE_DIR = __dirname;
@@ -131,6 +142,117 @@ const server = http.createServer(async (req, res) => {
         return jsonResponse(res, 200, { success: true });
       }
     }
+    // POST /api/create-payment-link (copy link only, no email)
+    if (req.method === 'POST' && pathname === '/api/create-payment-link') {
+      if (!stripe) return jsonResponse(res, 500, { error: 'Stripe is not configured' });
+
+      const body = await readBody(req);
+      const { contactId, amount, description } = JSON.parse(body);
+
+      if (!contactId || !amount || amount <= 0) {
+        return jsonResponse(res, 400, { error: 'Contact ID and valid amount are required' });
+      }
+
+      const contact = await db.getContactById(contactId);
+      if (!contact) return jsonResponse(res, 404, { error: 'Contact not found' });
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        customer_email: contact.email || undefined,
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: description || 'Kingship Concierge Service',
+              description: `Payment for ${contact.fullName}`,
+            },
+            unit_amount: Math.round(amount * 100),
+          },
+          quantity: 1,
+        }],
+        success_url: (req.headers.origin || 'http://localhost:8000') + '/payment-success.html',
+        cancel_url: (req.headers.origin || 'http://localhost:8000') + '/payment-cancel.html',
+      });
+
+      return jsonResponse(res, 200, {
+        success: true,
+        paymentUrl: session.url,
+        sessionId: session.id,
+      });
+    }
+
+    // POST /api/send-payment (create link + send email)
+    if (req.method === 'POST' && pathname === '/api/send-payment') {
+      if (!stripe) return jsonResponse(res, 500, { error: 'Stripe is not configured' });
+      if (!mailTransporter) return jsonResponse(res, 500, { error: 'Email is not configured' });
+
+      const body = await readBody(req);
+      const { contactId, amount, description } = JSON.parse(body);
+
+      if (!contactId || !amount || amount <= 0) {
+        return jsonResponse(res, 400, { error: 'Contact ID and valid amount are required' });
+      }
+
+      const contact = await db.getContactById(contactId);
+      if (!contact) return jsonResponse(res, 404, { error: 'Contact not found' });
+      if (!contact.email) return jsonResponse(res, 400, { error: 'Contact has no email address' });
+
+      // Create Stripe Payment Link via Checkout Session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        customer_email: contact.email,
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: description || 'Kingship Concierge Service',
+              description: `Payment for ${contact.fullName}`,
+            },
+            unit_amount: Math.round(amount * 100),
+          },
+          quantity: 1,
+        }],
+        success_url: (req.headers.origin || 'http://localhost:8000') + '/payment-success.html',
+        cancel_url: (req.headers.origin || 'http://localhost:8000') + '/payment-cancel.html',
+      });
+
+      // Send email with payment link
+      await mailTransporter.sendMail({
+        from: `"Kingship Concierge" <${process.env.SMTP_FROM}>`,
+        to: contact.email,
+        subject: 'Your Payment Link - Kingship Concierge',
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0A0A0A;color:#E8E4DC;padding:40px;border-radius:12px;">
+            <div style="text-align:center;margin-bottom:32px;">
+              <h1 style="color:#C9A84C;font-weight:300;letter-spacing:2px;margin:0;">KINGSHIP</h1>
+              <p style="color:rgba(232,228,220,0.5);font-size:13px;margin:4px 0 0;">Concierge Services</p>
+            </div>
+            <p style="font-size:16px;line-height:1.6;">Dear ${contact.fullName},</p>
+            <p style="font-size:16px;line-height:1.6;">Thank you for choosing Kingship Concierge. Please find your payment details below:</p>
+            <div style="background:#1A1A1A;border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:24px;margin:24px 0;text-align:center;">
+              <p style="color:rgba(232,228,220,0.5);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Amount Due</p>
+              <p style="color:#C9A84C;font-size:36px;font-weight:700;margin:0;">$${parseFloat(amount).toFixed(2)}</p>
+              ${description ? `<p style="color:rgba(232,228,220,0.5);font-size:14px;margin:8px 0 0;">${description}</p>` : ''}
+            </div>
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${session.url}" style="display:inline-block;background:#C9A84C;color:#0A0A0A;text-decoration:none;padding:14px 48px;border-radius:8px;font-size:16px;font-weight:600;letter-spacing:0.5px;">Pay Now</a>
+            </div>
+            <p style="font-size:13px;color:rgba(232,228,220,0.5);text-align:center;margin-top:32px;">This is a secure payment link powered by Stripe. Your payment information is encrypted and secure.</p>
+            <hr style="border:none;border-top:1px solid rgba(201,168,76,0.2);margin:32px 0;">
+            <p style="font-size:12px;color:rgba(232,228,220,0.3);text-align:center;">Kingship Concierge &mdash; Premium Transportation & Experiences</p>
+          </div>
+        `,
+      });
+
+      return jsonResponse(res, 200, {
+        success: true,
+        paymentUrl: session.url,
+        sessionId: session.id,
+      });
+    }
+
   } catch (err) {
     console.error('API error:', err);
     return jsonResponse(res, 500, { error: 'Internal server error' });
