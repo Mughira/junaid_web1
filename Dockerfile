@@ -9,7 +9,7 @@ RUN npm install --production
 # Copy everything (filtered by .dockerignore)
 COPY . .
 
-ENV DATABASE_URL=postgresql://postgres:OZNUHHFLjybIoxnvt6Hl@107.155.122.35:5432/kingship
+ENV DATABASE_URL=
 
 EXPOSE 8000
 
