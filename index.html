@@ -3083,12 +3083,19 @@
                                   var WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/ZJx0Xdwj7s9tscejUbWg/webhook-trigger/68a64cb3-301b-4647-ac5a-1b16136c43cb';
 
                                   try {
-                                    await fetch(WEBHOOK_URL, {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      mode: 'no-cors',
-                                      body: JSON.stringify(data)
-                                    });
+                                    await Promise.allSettled([
+                                      fetch(WEBHOOK_URL, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        mode: 'no-cors',
+                                        body: JSON.stringify(data)
+                                      }),
+                                      fetch('/api/contacts', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(data)
+                                      })
+                                    ]);
                                     document.querySelectorAll('.bq-step-panel').forEach(function(p) { p.classList.remove('active'); });
                                     document.getElementById('bq-stepper').style.opacity = '0.3';
                                     document.getElementById('bq-successWrap').classList.add('show');

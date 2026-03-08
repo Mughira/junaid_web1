@@ -6,8 +6,14 @@
   "scripts": {
     "start": "node server.js"
   },
-  "keywords": ["squarespace", "local-server"],
+  "keywords": [
+    "squarespace",
+    "local-server"
+  ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "pg": "^8.20.0"
+  }
 }
-

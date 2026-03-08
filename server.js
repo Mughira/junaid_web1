@@ -1,6 +1,8 @@
+require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const db = require('./db');
 
 const PORT = 8000;
 const BASE_DIR = __dirname;
@@ -30,7 +32,28 @@ const apiEndpoints = [
   '/api/census/form-render',
 ];
 
-const server = http.createServer((req, res) => {
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => resolve(body));
+    req.on('error', reject);
+  });
+}
+
+function setCorsHeaders(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+function jsonResponse(res, statusCode, data) {
+  setCorsHeaders(res);
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(data));
+}
+
+const server = http.createServer(async (req, res) => {
   // Use WHATWG URL API instead of deprecated url.parse()
   const baseUrl = `http://${req.headers.host || 'localhost'}`;
   let url;
@@ -41,21 +64,88 @@ const server = http.createServer((req, res) => {
     res.end('Bad Request: Invalid URL');
     return;
   }
-  
+
   // Decode URL-encoded characters (like %20 for spaces)
   let pathname;
   try {
     pathname = decodeURIComponent(url.pathname);
   } catch (err) {
-    // If already decoded, use as-is
     pathname = url.pathname;
   }
 
-  // Handle API POST requests - return empty JSON response
+  // --- CORS preflight ---
+  if (req.method === 'OPTIONS' && pathname.startsWith('/api/')) {
+    setCorsHeaders(res);
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // --- Contacts API ---
+  try {
+    // POST /api/contacts
+    if (req.method === 'POST' && pathname === '/api/contacts') {
+      const body = await readBody(req);
+      const data = JSON.parse(body);
+      const contact = await db.createContact(data);
+      return jsonResponse(res, 201, { contact, success: true });
+    }
+
+    // GET /api/contacts
+    if (req.method === 'GET' && pathname === '/api/contacts') {
+      const search = url.searchParams.get('search');
+      const service = url.searchParams.get('service');
+      const status = url.searchParams.get('status');
+      const contacts = await db.getContacts({ search, service, status });
+      const stats = await db.getStats();
+      return jsonResponse(res, 200, {
+        contacts,
+        total: contacts.length,
+        stats,
+        meta: { timestamp: new Date().toISOString(), version: '1.0' }
+      });
+    }
+
+    // GET/PATCH/DELETE /api/contacts/:id
+    const contactMatch = pathname.match(/^\/api\/contacts\/(\d+)$/);
+    if (contactMatch) {
+      const id = parseInt(contactMatch[1]);
+
+      if (req.method === 'GET') {
+        const contact = await db.getContactById(id);
+        if (!contact) return jsonResponse(res, 404, { error: 'Contact not found' });
+        return jsonResponse(res, 200, { contact });
+      }
+
+      if (req.method === 'PATCH') {
+        const body = await readBody(req);
+        const { status } = JSON.parse(body);
+        const contact = await db.updateContactStatus(id, status);
+        if (!contact) return jsonResponse(res, 404, { error: 'Contact not found' });
+        return jsonResponse(res, 200, { contact, success: true });
+      }
+
+      if (req.method === 'DELETE') {
+        const deleted = await db.deleteContact(id);
+        if (!deleted) return jsonResponse(res, 404, { error: 'Contact not found' });
+        return jsonResponse(res, 200, { success: true });
+      }
+    }
+  } catch (err) {
+    console.error('API error:', err);
+    return jsonResponse(res, 500, { error: 'Internal server error' });
+  }
+
+  // Handle Squarespace API POST requests - return empty JSON response
   if (req.method === 'POST' && apiEndpoints.some(endpoint => pathname.startsWith(endpoint))) {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
     res.end(JSON.stringify({}));
     return;
+  }
+
+  // Serve dashboard
+  if (pathname === '/dashboard') {
+    pathname = '/dashboard.html';
   }
 
   // Handle root - serve index.html
@@ -81,7 +171,7 @@ const server = http.createServer((req, res) => {
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
       // File not found - try fallback strategies
-      
+
       // Fallback 0: If no extension, try adding .html (e.g., /about -> /about.html)
       if (!ext && !pathname.endsWith('/')) {
         const htmlPath = filePath + '.html';
@@ -104,7 +194,7 @@ const server = http.createServer((req, res) => {
         });
         return;
       }
-      
+
       // Other fallback strategies
       handleOtherFallbacks();
       return;
@@ -122,7 +212,7 @@ const server = http.createServer((req, res) => {
       res.end(data);
     });
   });
-  
+
   // Helper function for other fallback strategies
   function handleOtherFallbacks() {
     // Fallback 1: For missing JS files, return empty to prevent chunk load errors
@@ -131,12 +221,12 @@ const server = http.createServer((req, res) => {
         res.end('// Missing file: ' + pathname + '\n');
         return;
       }
-      
+
       // Fallback 2: For images in subdirectories, check root directory
       if (ext === '.png' || ext === '.jpg' || ext === '.jpeg' || ext === '.gif' || ext === '.svg') {
         const fileName = path.basename(filePath);
         const rootFilePath = path.join(BASE_DIR, fileName);
-        
+
         fs.access(rootFilePath, fs.constants.F_OK, (fallbackErr) => {
           if (!fallbackErr) {
             // Found in root, serve it
@@ -158,16 +248,26 @@ const server = http.createServer((req, res) => {
         });
         return;
       }
-      
+
       // File not found - return 404
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('File not found: ' + pathname);
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`\n✅ Server running at http://localhost:${PORT}/`);
-  console.log(`📄 Open: http://localhost:${PORT}/index.html\n`);
-  console.log('Press Ctrl+C to stop the server\n');
+// Initialize database and start server
+db.initDB().then(() => {
+  server.listen(PORT, () => {
+    console.log(`\nServer running at http://localhost:${PORT}/`);
+    console.log(`Dashboard: http://localhost:${PORT}/dashboard`);
+    console.log(`API: http://localhost:${PORT}/api/contacts\n`);
+    console.log('Press Ctrl+C to stop the server\n');
+  });
+}).catch(err => {
+  console.error('Failed to initialize database:', err.message);
+  console.log('\nStarting server without database...');
+  server.listen(PORT, () => {
+    console.log(`\nServer running at http://localhost:${PORT}/`);
+    console.log('WARNING: Database is not connected. API endpoints will not work.\n');
+  });
 });
-
