@@ -1,26 +1,16 @@
-# Serve site + PHP contact form in one container
-FROM php:8.2-apache
+FROM node:20-alpine
 
-# Install Composer and deps for PHPMailer (openssl is usually already in php image)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    unzip \
-    libzip-dev \
-    && docker-php-ext-install -j$(nproc) zip \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Copy package files and install dependencies
+COPY package.json package-lock.json* ./
+RUN npm install --production
 
-WORKDIR /var/www/html
-
-# Copy app (excluding what's in .dockerignore)
+# Copy everything (filtered by .dockerignore)
 COPY . .
 
-# Install PHP deps (PHPMailer)
-RUN composer install --no-dev --no-interaction
+ENV DATABASE_URL=postgresql://postgres:OZNUHHFLjybIoxnvt6Hl@107.155.122.35:5432/kingship
 
-# Apache serves from /var/www/html; allow .htaccess if present
-RUN a2enmod rewrite headers 2>/dev/null || true
+EXPOSE 8000
 
-EXPOSE 80
+CMD ["node", "server.js"]

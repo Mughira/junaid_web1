@@ -1,27 +1,18 @@
-# Git
 .git
 .gitignore
-
-# Documentation (optional in image)
+.env
 README*.md
 *.md
-
-# Scripts not needed in container
 *.bat
 *.ps1
-
-# Docker
 Dockerfile
 .dockerignore
 docker-compose.yml
 docker-compose.*.yml
-
-# OS
 .DS_Store
 Thumbs.db
-
-# Node (we use PHP in this image; remove if you add Node later)
 node_modules
-package-lock.json
 npm-debug.log
-
+.vscode
+vendor
+data
