@@ -164,7 +164,7 @@ const server = http.createServer(async (req, res) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: description || 'Kingship Concierge Service',
+              name: description || 'Kingship Service',
               description: `Payment for ${contact.fullName}`,
             },
             unit_amount: Math.round(amount * 100),
@@ -207,7 +207,7 @@ const server = http.createServer(async (req, res) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: description || 'Kingship Concierge Service',
+              name: description || 'Kingship Service',
               description: `Payment for ${contact.fullName}`,
             },
             unit_amount: Math.round(amount * 100),
@@ -220,9 +220,9 @@ const server = http.createServer(async (req, res) => {
 
       // Send email with payment link
       await mailTransporter.sendMail({
-        from: `"Kingship Concierge" <${process.env.SMTP_FROM}>`,
+        from: `"Kingship" <${process.env.SMTP_FROM}>`,
         to: contact.email,
-        subject: 'Your Payment Link - Kingship Concierge',
+        subject: 'Your Payment Link - Kingship',
         html: `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0A0A0A;color:#E8E4DC;padding:40px;border-radius:12px;">
             <div style="text-align:center;margin-bottom:32px;">
@@ -230,7 +230,7 @@ const server = http.createServer(async (req, res) => {
               <p style="color:rgba(232,228,220,0.5);font-size:13px;margin:4px 0 0;">Concierge Services</p>
             </div>
             <p style="font-size:16px;line-height:1.6;">Dear ${contact.fullName},</p>
-            <p style="font-size:16px;line-height:1.6;">Thank you for choosing Kingship Concierge. Please find your payment details below:</p>
+            <p style="font-size:16px;line-height:1.6;">Thank you for choosing Kingship. Please find your payment details below:</p>
             <div style="background:#1A1A1A;border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:24px;margin:24px 0;text-align:center;">
               <p style="color:rgba(232,228,220,0.5);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Amount Due</p>
               <p style="color:#C9A84C;font-size:36px;font-weight:700;margin:0;">$${parseFloat(amount).toFixed(2)}</p>
@@ -241,7 +241,7 @@ const server = http.createServer(async (req, res) => {
             </div>
             <p style="font-size:13px;color:rgba(232,228,220,0.5);text-align:center;margin-top:32px;">This is a secure payment link powered by Stripe. Your payment information is encrypted and secure.</p>
             <hr style="border:none;border-top:1px solid rgba(201,168,76,0.2);margin:32px 0;">
-            <p style="font-size:12px;color:rgba(232,228,220,0.3);text-align:center;">Kingship Concierge &mdash; Premium Transportation & Experiences</p>
+            <p style="font-size:12px;color:rgba(232,228,220,0.3);text-align:center;">Kingship &mdash; Premium Transportation & Experiences</p>
           </div>
         `,
       });
