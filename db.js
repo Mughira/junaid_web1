@@ -22,7 +22,25 @@ async function initDB() {
         submitted_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
-    console.log('Database initialized - contacts table ready');
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS payments (
+        id SERIAL PRIMARY KEY,
+        contact_id INTEGER REFERENCES contacts(id) ON DELETE SET NULL,
+        invoice_number VARCHAR(20),
+        amount NUMERIC(10,2) NOT NULL,
+        description TEXT,
+        token TEXT,
+        transaction_id VARCHAR(100),
+        auth_code VARCHAR(50),
+        status VARCHAR(30) DEFAULT 'pending',
+        authnet_response JSONB,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    console.log('Database initialized - contacts & payments tables ready');
   } finally {
     client.release();
   }
@@ -126,4 +144,75 @@ function formatContact(row) {
   };
 }
 
-module.exports = { initDB, createContact, getContacts, getContactById, updateContactStatus, deleteContact, getStats };
+// ---------------------------------------------------------------------------
+// Payments
+// ---------------------------------------------------------------------------
+
+async function createPayment({ contactId, invoiceNumber, amount, description, token }) {
+  const result = await pool.query(
+    `INSERT INTO payments (contact_id, invoice_number, amount, description, token)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
+    [contactId, invoiceNumber, parseFloat(amount).toFixed(2), description || '', token]
+  );
+  return formatPayment(result.rows[0]);
+}
+
+async function updatePaymentByTransaction({ transactionId, authCode, status, authnetResponse }) {
+  // Try matching by transaction_id first, fall back to most recent pending for this transaction
+  const result = await pool.query(
+    `UPDATE payments
+     SET transaction_id = $1, auth_code = $2, status = $3, authnet_response = $4, updated_at = NOW()
+     WHERE id = (
+       SELECT id FROM payments
+       WHERE (transaction_id = $1 OR (transaction_id IS NULL AND status = 'pending'))
+       ORDER BY created_at DESC LIMIT 1
+     )
+     RETURNING *`,
+    [transactionId, authCode || null, status, JSON.stringify(authnetResponse || {})]
+  );
+  if (result.rows.length === 0) return null;
+  return formatPayment(result.rows[0]);
+}
+
+async function updatePaymentByToken(token, { transactionId, authCode, status, authnetResponse }) {
+  const result = await pool.query(
+    `UPDATE payments
+     SET transaction_id = $1, auth_code = $2, status = $3, authnet_response = $4, updated_at = NOW()
+     WHERE token = $5
+     RETURNING *`,
+    [transactionId || null, authCode || null, status, JSON.stringify(authnetResponse || {}), token]
+  );
+  if (result.rows.length === 0) return null;
+  return formatPayment(result.rows[0]);
+}
+
+async function getPaymentsByContact(contactId) {
+  const result = await pool.query(
+    'SELECT * FROM payments WHERE contact_id = $1 ORDER BY created_at DESC',
+    [contactId]
+  );
+  return result.rows.map(formatPayment);
+}
+
+function formatPayment(row) {
+  return {
+    id: row.id,
+    contactId: row.contact_id,
+    invoiceNumber: row.invoice_number,
+    amount: parseFloat(row.amount),
+    description: row.description,
+    token: row.token,
+    transactionId: row.transaction_id,
+    authCode: row.auth_code,
+    status: row.status,
+    authnetResponse: row.authnet_response,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+module.exports = {
+  initDB, createContact, getContacts, getContactById, updateContactStatus, deleteContact, getStats,
+  createPayment, updatePaymentByTransaction, updatePaymentByToken, getPaymentsByContact,
+};

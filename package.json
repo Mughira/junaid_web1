@@ -13,9 +13,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "authorizenet": "^1.0.10",
     "dotenv": "^17.3.1",
     "nodemailer": "^8.0.1",
-    "pg": "^8.20.0",
-    "stripe": "^20.4.1"
+    "pg": "^8.20.0"
   }
 }

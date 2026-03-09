@@ -136,9 +136,9 @@ select:focus{border-color:var(--gold)}
 .pay-field .amount-input input{padding-left:32px;font-size:20px;font-weight:600}
 .pay-field textarea{resize:vertical;min-height:60px;font-size:14px}
 .payment-dialog .btns{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
-.btn-stripe{background:linear-gradient(135deg,#C9A84C,#E8C97A);color:var(--dark);border:none;font-weight:700;letter-spacing:.3px}
-.btn-stripe:hover{background:linear-gradient(135deg,#E8C97A,#C9A84C);color:var(--dark)}
-.btn-stripe:disabled{opacity:.5;cursor:not-allowed}
+.btn-pay{background:linear-gradient(135deg,#C9A84C,#E8C97A);color:var(--dark);border:none;font-weight:700;letter-spacing:.3px}
+.btn-pay:hover{background:linear-gradient(135deg,#E8C97A,#C9A84C);color:var(--dark)}
+.btn-pay:disabled{opacity:.5;cursor:not-allowed}
 
 /* Responsive */
 @media(max-width:900px){
@@ -214,7 +214,7 @@ select:focus{border-color:var(--gold)}
 <div class="overlay" id="paymentOverlay">
   <div class="payment-dialog">
     <h3>Send Payment Link</h3>
-    <p class="pay-subtitle">A Stripe payment link will be emailed to the customer</p>
+    <p class="pay-subtitle">An Authorize.net payment link will be emailed to the customer</p>
     <div class="pay-to">
       <div>
         <div class="pay-name" id="payName"></div>
@@ -235,7 +235,7 @@ select:focus{border-color:var(--gold)}
     <div class="btns">
       <button class="btn" onclick="closePayment()">Cancel</button>
       <button class="btn" id="payCopyBtn" onclick="copyPaymentLink()">Copy Link</button>
-      <button class="btn btn-stripe" id="paySubmitBtn" onclick="submitPayment()">Send &amp; Email</button>
+      <button class="btn btn-pay" id="paySubmitBtn" onclick="submitPayment()">Send &amp; Email</button>
     </div>
   </div>
 </div>
@@ -485,6 +485,7 @@ async function submitPayment() {
   const amount = parseFloat(document.getElementById('payAmount').value);
   const description = document.getElementById('payDescription').value.trim();
   if (!amount || amount <= 0) return showToast('Enter a valid amount', 'error');
+  if (amount > 999999.99) return showToast('Amount too large', 'error');
 
   const btn = document.getElementById('paySubmitBtn');
   btn.disabled = true;
@@ -497,13 +498,13 @@ async function submitPayment() {
       body: JSON.stringify({ contactId: payContactId, amount, description })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed');
+    if (!res.ok) throw new Error((data.error && data.error.message) || 'Failed');
     closePayment();
     showToast('Payment link sent to ' + document.getElementById('payEmail').textContent);
   } catch (err) {
     showToast(err.message || 'Failed to send payment link', 'error');
     btn.disabled = false;
-    btn.textContent = 'Send Payment Link';
+    btn.textContent = 'Send & Email';
   }
 }
 
@@ -511,6 +512,7 @@ async function copyPaymentLink() {
   const amount = parseFloat(document.getElementById('payAmount').value);
   const description = document.getElementById('payDescription').value.trim();
   if (!amount || amount <= 0) return showToast('Enter a valid amount', 'error');
+  if (amount > 999999.99) return showToast('Amount too large', 'error');
 
   const btn = document.getElementById('payCopyBtn');
   btn.disabled = true;
@@ -523,8 +525,8 @@ async function copyPaymentLink() {
       body: JSON.stringify({ contactId: payContactId, amount, description })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed');
-    await navigator.clipboard.writeText(data.paymentUrl);
+    if (!res.ok) throw new Error((data.error && data.error.message) || 'Failed');
+    await navigator.clipboard.writeText(data.paymentPageUrl);
     closePayment();
     showToast('Payment link copied to clipboard!');
   } catch (err) {

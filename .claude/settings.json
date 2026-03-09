@@ -9,7 +9,9 @@
       "Bash(docker compose exec web sh -c \"wget -qO- http://localhost:8000/dashboard | head -5\")",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/dashboard)",
       "Bash(curl -s http://localhost:8000/dashboard)",
-      "Bash(npm install stripe nodemailer)"
+      "Bash(npm install stripe nodemailer)",
+      "Bash(npm uninstall stripe)",
+      "Bash(npm install authorizenet)"
     ]
   }
 }
