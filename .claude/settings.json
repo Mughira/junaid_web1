@@ -11,7 +11,17 @@
       "Bash(curl -s http://localhost:8000/dashboard)",
       "Bash(npm install stripe nodemailer)",
       "Bash(npm uninstall stripe)",
-      "Bash(npm install authorizenet)"
+      "Bash(npm install authorizenet)",
+      "WebSearch",
+      "WebFetch(domain:rentsyst.com)",
+      "WebFetch(domain:documenter.getpostman.com)",
+      "WebFetch(domain:blog.rentsyst.com)",
+      "WebFetch(domain:docs.rentsyst.com)",
+      "WebFetch(domain:api.rentsyst.com)",
+      "WebFetch(domain:www.postman.com)",
+      "WebFetch(domain:dev.rentsyst.com)",
+      "WebFetch(domain:plugins.svn.wordpress.org)",
+      "WebFetch(domain:web.archive.org)"
     ]
   }
 }

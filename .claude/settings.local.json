@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sL \"https://downloads.wordpress.org/plugin/rentsyst.latest-stable.zip\" -o /tmp/rentsyst.zip)",
+      "Bash(unzip -q /tmp/rentsyst.zip -d /tmp/rentsyst_plugin)",
+      "Bash(node -c rentsyst.js)",
+      "Bash(node -c server.js)",
+      "Bash(node -c authnet.js)",
+      "Bash(node -c db.js)"
+    ]
+  }
+}

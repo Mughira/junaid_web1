@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const db = require('./db');
 const authnet = require('./authnet');
+const rentsyst = require('./rentsyst');
 const nodemailer = require('nodemailer');
 
 // ---------------------------------------------------------------------------
@@ -500,6 +501,73 @@ const server = http.createServer(async (req, res) => {
       return jsonResponse(res, 200, { success: true, received: eventType });
     }
 
+    // -----------------------------------------------------------------
+    // RentSyst Integration – Vehicle Availability
+    // -----------------------------------------------------------------
+
+    // GET /api/rentsyst/vehicles – list all fleet vehicles
+    if (req.method === 'GET' && pathname === '/api/rentsyst/vehicles') {
+      if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
+      const data = await rentsyst.getVehicles();
+      return jsonResponse(res, 200, { success: true, data });
+    }
+
+    // GET /api/rentsyst/locations – locations with vehicles
+    if (req.method === 'GET' && pathname === '/api/rentsyst/locations') {
+      if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
+      const data = await rentsyst.getLocations();
+      return jsonResponse(res, 200, { success: true, data });
+    }
+
+    // GET /api/rentsyst/availability?start_date=...&end_date=...&location_id=...
+    if (req.method === 'GET' && pathname === '/api/rentsyst/availability') {
+      if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
+
+      const start_date = url.searchParams.get('start_date');
+      const end_date = url.searchParams.get('end_date');
+      if (!start_date || !end_date) {
+        return jsonError(res, 400, 'start_date and end_date query params are required (YYYY-MM-DD or YYYY-MM-DD HH:mm)');
+      }
+
+      const params = { start_date, end_date };
+      const location_id = url.searchParams.get('location_id');
+      const return_location_id = url.searchParams.get('return_location_id');
+      const vehicle_id = url.searchParams.get('vehicle_id');
+      const category_id = url.searchParams.get('category_id');
+      if (location_id) params.location_id = location_id;
+      if (return_location_id) params.return_location_id = return_location_id;
+      if (vehicle_id) params.vehicle_id = vehicle_id;
+      if (category_id) params.category_id = category_id;
+
+      const data = await rentsyst.searchAvailability(params);
+      return jsonResponse(res, 200, { success: true, data });
+    }
+
+    // GET /api/rentsyst/busy-dates?vehicle_id=...&start_date=...&end_date=...
+    if (req.method === 'GET' && pathname === '/api/rentsyst/busy-dates') {
+      if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
+
+      const params = {};
+      const vehicle_id = url.searchParams.get('vehicle_id');
+      const location_id = url.searchParams.get('location_id');
+      const start_date = url.searchParams.get('start_date');
+      const end_date = url.searchParams.get('end_date');
+      if (vehicle_id) params.vehicle_id = vehicle_id;
+      if (location_id) params.location_id = location_id;
+      if (start_date) params.start_date = start_date;
+      if (end_date) params.end_date = end_date;
+
+      const data = await rentsyst.getBusyDates(params);
+      return jsonResponse(res, 200, { success: true, data });
+    }
+
+    // GET /api/rentsyst/settings – company settings
+    if (req.method === 'GET' && pathname === '/api/rentsyst/settings') {
+      if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
+      const data = await rentsyst.getCompanySettings();
+      return jsonResponse(res, 200, { success: true, data });
+    }
+
   } catch (err) {
     // Structured error handling for validation errors thrown by validatePaymentInput
     if (err.status) {
@@ -509,6 +577,11 @@ const server = http.createServer(async (req, res) => {
     if (err.code && err.raw) {
       console.error(`[authnet] API error (${err.code}): ${err.message}`);
       return jsonError(res, 502, 'Payment gateway error: ' + err.message, { code: err.code });
+    }
+    // RentSyst API errors
+    if (err.message && err.message.startsWith('RentSyst')) {
+      console.error(`[rentsyst] ${err.message}`);
+      return jsonError(res, err.status || 502, err.message);
     }
     // JSON parse errors
     if (err instanceof SyntaxError) {
@@ -620,6 +693,7 @@ db.initDB()
       console.log(`Payment webhook: http://localhost:${PORT}/api/payment-webhook`);
       console.log(`Authorize.Net: ${authnet.isConfigured() ? 'configured' : 'NOT configured'} (${authnet.isProduction() ? 'PRODUCTION' : 'SANDBOX'})`);
       console.log(`SMTP: ${mailTransporter ? 'configured' : 'NOT configured'}`);
+      console.log(`RentSyst: ${rentsyst.isConfigured() ? 'configured' : 'NOT configured'}`);
       console.log(`Auth: ${API_KEY ? 'API key set' : 'NO API key (dev mode – all requests allowed)'}\n`);
     });
   })

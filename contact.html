@@ -1718,6 +1718,27 @@
       @keyframes bqFadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
       @keyframes bqPanelIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
       @keyframes bqPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.3); } 50% { box-shadow: 0 0 0 12px rgba(201,168,76,0); } }
+
+      /* ——— Availability Widget ——— */
+      .bq-wrap .bq-avail-widget { margin-top:16px; padding:16px; background:var(--bq-dark3); border:1px solid var(--bq-border); border-radius:2px; }
+      .bq-wrap .bq-avail-widget .bq-avail-title { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--bq-gold); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+      .bq-wrap .bq-avail-spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--bq-border); border-top-color:var(--bq-gold); border-radius:50%; animation: bqSpin 0.8s linear infinite; }
+      @keyframes bqSpin { to { transform:rotate(360deg); } }
+      .bq-wrap .bq-avail-status { font-size:13px; line-height:1.5; color:var(--bq-text-dim); }
+      .bq-wrap .bq-avail-status.available { color:#4CAF50; }
+      .bq-wrap .bq-avail-status.unavailable { color:#e74c3c; }
+      .bq-wrap .bq-avail-status.loading { color:var(--bq-text-dim); }
+      .bq-wrap .bq-avail-vehicles { display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px; }
+      .bq-wrap .bq-avail-card { display:flex; align-items:center; gap:12px; padding:12px; background:var(--bq-dark2); border:1px solid var(--bq-border); border-radius:2px; cursor:pointer; transition:border-color .2s; }
+      .bq-wrap .bq-avail-card:hover, .bq-wrap .bq-avail-card.selected { border-color:var(--bq-gold); }
+      .bq-wrap .bq-avail-card .bq-avail-vname { font-size:14px; font-weight:600; color:var(--bq-text); }
+      .bq-wrap .bq-avail-card .bq-avail-vdetail { font-size:12px; color:var(--bq-text-dim); }
+      .bq-wrap .bq-avail-card .bq-avail-vprice { margin-left:auto; font-size:15px; font-weight:700; color:var(--bq-gold); white-space:nowrap; }
+      .bq-wrap .bq-avail-card .bq-avail-badge { font-size:10px; padding:3px 8px; border-radius:1px; letter-spacing:0.5px; font-weight:600; }
+      .bq-wrap .bq-avail-card .bq-avail-badge.open { background:rgba(76,175,80,0.15); color:#4CAF50; }
+      .bq-wrap .bq-avail-card .bq-avail-badge.busy { background:rgba(231,76,60,0.15); color:#e74c3c; }
+      .bq-wrap .bq-avail-noconfig { font-size:12px; color:var(--bq-text-dim); font-style:italic; }
+
       @media (max-width: 640px) {
         .bq-wrap .bq-card-header, .bq-wrap .bq-card-body, .bq-wrap .bq-nav-row { padding-left: 24px; padding-right: 24px; }
         .bq-wrap .bq-field-row, .bq-wrap .bq-field-row.bq-triple { grid-template-columns: 1fr; }
@@ -1975,7 +1996,13 @@
           '<div class="bq-field-row"><div class="bq-field"><label>Vehicle Category</label>' + bqMakeRadioGroup('c_vehicle', ['Luxury Sedan','Executive SUV','VIP Van','Limousine']) + '</div></div>' +
           '<div class="bq-field-row"><div class="bq-field"><label>Passengers</label><input type="number" name="c_pax" placeholder="Number" min="1"></div><div class="bq-field"><label>Luggage Count</label><input type="number" name="c_luggage" placeholder="Number" min="0"></div></div>' +
           '<div class="bq-field-row bq-full"><div class="bq-field"><label>Purpose of Booking</label>' + bqMakeRadioGroup('c_purpose', ['Airport Transfer','Corporate Travel','Wedding','City Tour','VIP Protocol','Other']) + '</div></div>' +
-          '<div class="bq-field-row bq-full"><div class="bq-field"><label>Special Requirements</label>' + bqMakeCheckGroup('c_special', ['Child Seat','Wheelchair Access','VIP Privacy','Security Personnel']) + '</div></div>';
+          '<div class="bq-field-row bq-full"><div class="bq-field"><label>Special Requirements</label>' + bqMakeCheckGroup('c_special', ['Child Seat','Wheelchair Access','VIP Privacy','Security Personnel']) + '</div></div>' +
+          '<div class="bq-field-row bq-full"><div class="bq-field">' +
+          '<div class="bq-avail-widget" id="bq-avail-widget">' +
+          '<div class="bq-avail-title">&#128203; Vehicle Availability</div>' +
+          '<div class="bq-avail-status" id="bq-avail-status">Select a <strong>date</strong> and <strong>time</strong> above to check real-time vehicle availability.</div>' +
+          '<div class="bq-avail-vehicles" id="bq-avail-vehicles" style="display:none;"></div>' +
+          '</div></div></div>';
         }
 
         if (bqSelectedServices.has('yacht')) {
@@ -2001,7 +2028,126 @@
         }
 
         body.innerHTML = html;
+
+        // Attach availability-check listeners if chauffeur service is selected
+        if (bqSelectedServices.has('chauffeur')) {
+          bqAttachAvailListeners();
+        }
       }
+
+      // ——— RentSyst availability check ———
+      var bqAvailTimer = null;
+      var bqSelectedRsVehicle = null;
+
+      function bqAttachAvailListeners() {
+        var dateInp = document.querySelector('input[name="c_date"]');
+        var timeInp = document.querySelector('input[name="c_time"]');
+        if (dateInp) dateInp.addEventListener('change', bqTriggerAvailCheck);
+        if (timeInp) timeInp.addEventListener('change', bqTriggerAvailCheck);
+      }
+
+      function bqTriggerAvailCheck() {
+        clearTimeout(bqAvailTimer);
+        bqAvailTimer = setTimeout(bqCheckAvailability, 400);
+      }
+
+      async function bqCheckAvailability() {
+        var dateInp = document.querySelector('input[name="c_date"]');
+        var timeInp = document.querySelector('input[name="c_time"]');
+        var statusEl = document.getElementById('bq-avail-status');
+        var vehiclesEl = document.getElementById('bq-avail-vehicles');
+        if (!dateInp || !statusEl) return;
+
+        var dateVal = dateInp.value;
+        if (!dateVal) {
+          statusEl.className = 'bq-avail-status';
+          statusEl.innerHTML = 'Select a <strong>date</strong> and <strong>time</strong> above to check real-time vehicle availability.';
+          if (vehiclesEl) vehiclesEl.style.display = 'none';
+          return;
+        }
+
+        var timeVal = timeInp ? timeInp.value : '';
+        var startDateTime = dateVal + (timeVal ? ' ' + timeVal : ' 09:00');
+        var startD = new Date(dateVal + 'T' + (timeVal || '09:00'));
+        var endD = new Date(startD.getTime() + 4 * 3600000);
+        var endDate = endD.toISOString().slice(0, 10) + ' ' + endD.toTimeString().slice(0, 5);
+
+        statusEl.className = 'bq-avail-status loading';
+        statusEl.innerHTML = '<span class="bq-avail-spinner"></span> Checking vehicle availability\u2026';
+        if (vehiclesEl) vehiclesEl.style.display = 'none';
+
+        try {
+          var res = await fetch('/api/rentsyst/availability?start_date=' + encodeURIComponent(startDateTime) + '&end_date=' + encodeURIComponent(endDate));
+          var json = await res.json();
+
+          if (!res.ok) {
+            if (res.status === 503) {
+              statusEl.className = 'bq-avail-status';
+              statusEl.innerHTML = '<span class="bq-avail-noconfig">Real-time availability is not available at this time. Please continue with your booking.</span>';
+              return;
+            }
+            throw new Error((json.error && json.error.message) || 'Failed to check availability');
+          }
+
+          var data = json.data;
+          var vehicles = Array.isArray(data) ? data : (data && data.items ? data.items : (data && data.data ? data.data : []));
+
+          if (vehicles.length === 0) {
+            statusEl.className = 'bq-avail-status unavailable';
+            statusEl.innerHTML = '&#10060; No vehicles available for <strong>' + dateVal + '</strong>. Try a different date or contact us directly.';
+            if (vehiclesEl) vehiclesEl.style.display = 'none';
+            return;
+          }
+
+          statusEl.className = 'bq-avail-status available';
+          statusEl.innerHTML = '&#9989; <strong>' + vehicles.length + '</strong> vehicle' + (vehicles.length > 1 ? 's' : '') + ' available for <strong>' + dateVal + '</strong>:';
+
+          if (vehiclesEl) {
+            vehiclesEl.style.display = 'grid';
+            vehiclesEl.innerHTML = vehicles.map(function(v) {
+              var name = v.name || v.title || v.model || ('Vehicle #' + (v.id || ''));
+              var category = v.category_name || v.category || v.type || v.group_name || '';
+              var price = v.price || v.total_price || v.rate || '';
+              var currency = v.currency || '$';
+              var vid = v.id || '';
+              var imgUrl = v.image || v.photo || v.thumbnail || '';
+
+              return '<div class="bq-avail-card" data-vehicle-id="' + vid + '" onclick="bqSelectRsVehicle(this, \'' + bqEscAttr(name) + '\', \'' + vid + '\')">' +
+                (imgUrl ? '<img src="' + imgUrl + '" alt="" style="width:60px;height:40px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') +
+                '<div>' +
+                '<div class="bq-avail-vname">' + bqEscHtml(name) + '</div>' +
+                (category ? '<div class="bq-avail-vdetail">' + bqEscHtml(category) + '</div>' : '') +
+                '</div>' +
+                '<span class="bq-avail-badge open">Available</span>' +
+                (price ? '<div class="bq-avail-vprice">' + currency + parseFloat(price).toFixed(0) + '</div>' : '') +
+                '</div>';
+            }).join('');
+          }
+        } catch (err) {
+          statusEl.className = 'bq-avail-status';
+          statusEl.innerHTML = '<span class="bq-avail-noconfig">Could not check availability. Please continue with your booking.</span>';
+          if (vehiclesEl) vehiclesEl.style.display = 'none';
+          console.warn('[availability]', err.message);
+        }
+      }
+
+      function bqSelectRsVehicle(el, name, vid) {
+        document.querySelectorAll('.bq-avail-card').forEach(function(c) { c.classList.remove('selected'); });
+        el.classList.add('selected');
+        bqSelectedRsVehicle = { id: vid, name: name };
+
+        var vehicleRadios = document.querySelectorAll('#bq-rg-c_vehicle .bq-radio-pill');
+        vehicleRadios.forEach(function(pill) {
+          var pillLabel = pill.textContent.trim().toLowerCase();
+          if (name.toLowerCase().indexOf('sedan') > -1 && pillLabel.indexOf('sedan') > -1) { pill.click(); }
+          else if (name.toLowerCase().indexOf('suv') > -1 && pillLabel.indexOf('suv') > -1) { pill.click(); }
+          else if (name.toLowerCase().indexOf('van') > -1 && pillLabel.indexOf('van') > -1) { pill.click(); }
+          else if (name.toLowerCase().indexOf('limo') > -1 && pillLabel.indexOf('limo') > -1) { pill.click(); }
+        });
+      }
+
+      function bqEscHtml(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+      function bqEscAttr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
 
       // ——— Review panel ———
       function bqBuildReview() {
@@ -2108,6 +2254,10 @@
         var inputs = document.querySelectorAll('#bq-mainForm input, #bq-mainForm select, #bq-mainForm textarea');
         inputs.forEach(function(inp) { if (inp.name && inp.value) data[inp.name] = inp.value; });
         data['services'] = [...bqSelectedServices].join(', ');
+        if (bqSelectedRsVehicle) {
+          data['rentsyst_vehicle_id'] = bqSelectedRsVehicle.id;
+          data['rentsyst_vehicle_name'] = bqSelectedRsVehicle.name;
+        }
 
         var WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/ZJx0Xdwj7s9tscejUbWg/webhook-trigger/68a64cb3-301b-4647-ac5a-1b16136c43cb';
 
