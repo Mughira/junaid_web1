@@ -505,41 +505,25 @@ const server = http.createServer(async (req, res) => {
     // RentSyst Integration – Vehicle Availability
     // -----------------------------------------------------------------
 
-    // GET /api/rentsyst/vehicles – list all fleet vehicles
+    // GET /api/rentsyst/vehicles – list all fleet vehicles (raw)
     if (req.method === 'GET' && pathname === '/api/rentsyst/vehicles') {
       if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
       const data = await rentsyst.getVehicles();
       return jsonResponse(res, 200, { success: true, data });
     }
 
-    // GET /api/rentsyst/locations – locations with vehicles
-    if (req.method === 'GET' && pathname === '/api/rentsyst/locations') {
-      if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
-      const data = await rentsyst.getLocations();
-      return jsonResponse(res, 200, { success: true, data });
-    }
-
-    // GET /api/rentsyst/availability?start_date=...&end_date=...&location_id=...
+    // GET /api/rentsyst/availability?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
+    // Returns fleet vehicles annotated with availability for the date range
     if (req.method === 'GET' && pathname === '/api/rentsyst/availability') {
       if (!rentsyst.isConfigured()) return jsonError(res, 503, 'RentSyst is not configured');
 
       const start_date = url.searchParams.get('start_date');
       const end_date = url.searchParams.get('end_date');
       if (!start_date || !end_date) {
-        return jsonError(res, 400, 'start_date and end_date query params are required (YYYY-MM-DD or YYYY-MM-DD HH:mm)');
+        return jsonError(res, 400, 'start_date and end_date are required (YYYY-MM-DD)');
       }
 
-      const params = { start_date, end_date };
-      const location_id = url.searchParams.get('location_id');
-      const return_location_id = url.searchParams.get('return_location_id');
-      const vehicle_id = url.searchParams.get('vehicle_id');
-      const category_id = url.searchParams.get('category_id');
-      if (location_id) params.location_id = location_id;
-      if (return_location_id) params.return_location_id = return_location_id;
-      if (vehicle_id) params.vehicle_id = vehicle_id;
-      if (category_id) params.category_id = category_id;
-
-      const data = await rentsyst.searchAvailability(params);
+      const data = await rentsyst.checkAvailability(start_date, end_date);
       return jsonResponse(res, 200, { success: true, data });
     }
 
@@ -549,11 +533,9 @@ const server = http.createServer(async (req, res) => {
 
       const params = {};
       const vehicle_id = url.searchParams.get('vehicle_id');
-      const location_id = url.searchParams.get('location_id');
       const start_date = url.searchParams.get('start_date');
       const end_date = url.searchParams.get('end_date');
       if (vehicle_id) params.vehicle_id = vehicle_id;
-      if (location_id) params.location_id = location_id;
       if (start_date) params.start_date = start_date;
       if (end_date) params.end_date = end_date;
 
@@ -581,7 +563,10 @@ const server = http.createServer(async (req, res) => {
     // RentSyst API errors
     if (err.message && err.message.startsWith('RentSyst')) {
       console.error(`[rentsyst] ${err.message}`);
-      return jsonError(res, err.status || 502, err.message);
+      const status = err.status === 429 ? 429 : (err.status || 502);
+      return jsonError(res, status, err.status === 429
+        ? 'Vehicle availability data is temporarily unavailable. Please try again in a few minutes.'
+        : err.message);
     }
     // JSON parse errors
     if (err instanceof SyntaxError) {
@@ -686,6 +671,9 @@ const server = http.createServer(async (req, res) => {
 
 db.initDB()
   .then(() => {
+    // Warm RentSyst fleet cache on startup (non-blocking)
+    rentsyst.warmCache();
+
     server.listen(PORT, () => {
       console.log(`\nServer running at http://localhost:${PORT}/`);
       console.log(`Dashboard: http://localhost:${PORT}/dashboard`);

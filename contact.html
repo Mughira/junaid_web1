@@ -2048,12 +2048,11 @@
 
       function bqTriggerAvailCheck() {
         clearTimeout(bqAvailTimer);
-        bqAvailTimer = setTimeout(bqCheckAvailability, 400);
+        bqAvailTimer = setTimeout(bqCheckAvailability, 800);
       }
 
       async function bqCheckAvailability() {
         var dateInp = document.querySelector('input[name="c_date"]');
-        var timeInp = document.querySelector('input[name="c_time"]');
         var statusEl = document.getElementById('bq-avail-status');
         var vehiclesEl = document.getElementById('bq-avail-vehicles');
         if (!dateInp || !statusEl) return;
@@ -2061,65 +2060,67 @@
         var dateVal = dateInp.value;
         if (!dateVal) {
           statusEl.className = 'bq-avail-status';
-          statusEl.innerHTML = 'Select a <strong>date</strong> and <strong>time</strong> above to check real-time vehicle availability.';
+          statusEl.innerHTML = 'Select a <strong>date</strong> above to check real-time vehicle availability.';
           if (vehiclesEl) vehiclesEl.style.display = 'none';
           return;
         }
 
-        var timeVal = timeInp ? timeInp.value : '';
-        var startDateTime = dateVal + (timeVal ? ' ' + timeVal : ' 09:00');
-        var startD = new Date(dateVal + 'T' + (timeVal || '09:00'));
-        var endD = new Date(startD.getTime() + 4 * 3600000);
-        var endDate = endD.toISOString().slice(0, 10) + ' ' + endD.toTimeString().slice(0, 5);
+        var startD = new Date(dateVal + 'T00:00:00');
+        var endD = new Date(startD.getTime() + 86400000);
+        var endDate = endD.toISOString().slice(0, 10);
 
         statusEl.className = 'bq-avail-status loading';
         statusEl.innerHTML = '<span class="bq-avail-spinner"></span> Checking vehicle availability\u2026';
         if (vehiclesEl) vehiclesEl.style.display = 'none';
 
         try {
-          var res = await fetch('/api/rentsyst/availability?start_date=' + encodeURIComponent(startDateTime) + '&end_date=' + encodeURIComponent(endDate));
+          var res = await fetch('/api/rentsyst/availability?start_date=' + encodeURIComponent(dateVal) + '&end_date=' + encodeURIComponent(endDate));
           var json = await res.json();
 
           if (!res.ok) {
-            if (res.status === 503) {
+            if (res.status === 503 || res.status === 429) {
               statusEl.className = 'bq-avail-status';
-              statusEl.innerHTML = '<span class="bq-avail-noconfig">Real-time availability is not available at this time. Please continue with your booking.</span>';
+              statusEl.innerHTML = '<span class="bq-avail-noconfig">Real-time availability is temporarily unavailable. Please continue with your booking.</span>';
               return;
             }
             throw new Error((json.error && json.error.message) || 'Failed to check availability');
           }
 
-          var data = json.data;
-          var vehicles = Array.isArray(data) ? data : (data && data.items ? data.items : (data && data.data ? data.data : []));
+          var vehicles = json.data && json.data.vehicles ? json.data.vehicles : [];
+          var availCount = vehicles.filter(function(v) { return v.available; }).length;
 
           if (vehicles.length === 0) {
-            statusEl.className = 'bq-avail-status unavailable';
-            statusEl.innerHTML = '&#10060; No vehicles available for <strong>' + dateVal + '</strong>. Try a different date or contact us directly.';
+            statusEl.className = 'bq-avail-status';
+            statusEl.innerHTML = '<span class="bq-avail-noconfig">No vehicles in fleet. Please continue with your booking.</span>';
             if (vehiclesEl) vehiclesEl.style.display = 'none';
             return;
           }
 
-          statusEl.className = 'bq-avail-status available';
-          statusEl.innerHTML = '&#9989; <strong>' + vehicles.length + '</strong> vehicle' + (vehicles.length > 1 ? 's' : '') + ' available for <strong>' + dateVal + '</strong>:';
+          if (availCount === 0) {
+            statusEl.className = 'bq-avail-status unavailable';
+            statusEl.innerHTML = '&#10060; All vehicles are booked for <strong>' + dateVal + '</strong>. Try a different date or contact us directly.';
+          } else {
+            statusEl.className = 'bq-avail-status available';
+            statusEl.innerHTML = '&#9989; <strong>' + availCount + '</strong> of ' + vehicles.length + ' vehicle' + (vehicles.length > 1 ? 's' : '') + ' available for <strong>' + dateVal + '</strong>:';
+          }
 
           if (vehiclesEl) {
             vehiclesEl.style.display = 'grid';
             vehiclesEl.innerHTML = vehicles.map(function(v) {
-              var name = v.name || v.title || v.model || ('Vehicle #' + (v.id || ''));
-              var category = v.category_name || v.category || v.type || v.group_name || '';
-              var price = v.price || v.total_price || v.rate || '';
-              var currency = v.currency || '$';
-              var vid = v.id || '';
-              var imgUrl = v.image || v.photo || v.thumbnail || '';
+              var isAvail = v.available;
+              var details = [v.bodyType, v.transmission, v.fuel, v.year].filter(Boolean).join(' \u00b7 ');
+              var seatsInfo = v.seats ? v.seats + ' seat' + (v.seats > 1 ? 's' : '') : '';
+              var subline = [details, seatsInfo].filter(Boolean).join(' \u00b7 ');
 
-              return '<div class="bq-avail-card" data-vehicle-id="' + vid + '" onclick="bqSelectRsVehicle(this, \'' + bqEscAttr(name) + '\', \'' + vid + '\')">' +
-                (imgUrl ? '<img src="' + imgUrl + '" alt="" style="width:60px;height:40px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') +
-                '<div>' +
-                '<div class="bq-avail-vname">' + bqEscHtml(name) + '</div>' +
-                (category ? '<div class="bq-avail-vdetail">' + bqEscHtml(category) + '</div>' : '') +
+              return '<div class="bq-avail-card' + (isAvail ? '' : ' busy') + '" data-vehicle-id="' + v.id + '"' +
+                (isAvail ? ' onclick="bqSelectRsVehicle(this, \'' + bqEscAttr(v.name) + '\', \'' + v.id + '\')" style="cursor:pointer;"' : ' style="opacity:0.5;cursor:not-allowed;"') + '>' +
+                (v.thumbnail ? '<img src="' + v.thumbnail + '" alt="" style="width:64px;height:44px;object-fit:cover;border-radius:2px;flex-shrink:0;">' : '') +
+                '<div style="flex:1;min-width:0;">' +
+                '<div class="bq-avail-vname">' + bqEscHtml(v.name) + '</div>' +
+                (subline ? '<div class="bq-avail-vdetail">' + bqEscHtml(subline) + '</div>' : '') +
                 '</div>' +
-                '<span class="bq-avail-badge open">Available</span>' +
-                (price ? '<div class="bq-avail-vprice">' + currency + parseFloat(price).toFixed(0) + '</div>' : '') +
+                '<span class="bq-avail-badge ' + (isAvail ? 'open' : 'busy') + '">' + (isAvail ? 'Available' : 'Booked') + '</span>' +
+                (v.price ? '<div class="bq-avail-vprice">' + v.currency + v.price + '/day</div>' : '') +
                 '</div>';
             }).join('');
           }

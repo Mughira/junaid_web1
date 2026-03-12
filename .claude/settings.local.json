@@ -6,7 +6,8 @@
       "Bash(node -c rentsyst.js)",
       "Bash(node -c server.js)",
       "Bash(node -c authnet.js)",
-      "Bash(node -c db.js)"
+      "Bash(node -c db.js)",
+      "Bash(node -e \":*)"
     ]
   }
 }
