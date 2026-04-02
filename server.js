@@ -2,6 +2,7 @@ require('dotenv').config();
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 const db = require('./db');
 const authnet = require('./authnet');
 const rentsyst = require('./rentsyst');
@@ -595,6 +596,47 @@ const server = http.createServer(async (req, res) => {
   const ext = path.extname(filePath).toLowerCase();
   const contentType = mimeTypes[ext] || 'application/octet-stream';
 
+  // Compressible MIME types for gzip
+  const compressible = ['.html', '.css', '.js', '.json', '.svg', '.xml'];
+
+  /**
+   * Send a static file with gzip compression (for text) and cache headers.
+   * Images/fonts get long cache (7 days), HTML gets short cache (10 min).
+   */
+  function sendFile(res, statusCode, data, type) {
+    const fileExt = ext || '.html';
+    const isText = compressible.includes(fileExt);
+
+    // Cache headers: images/fonts 7 days, CSS/JS 1 day, HTML 10 min
+    let cacheControl = 'public, max-age=600'; // HTML default: 10 min
+    if (['.css', '.js'].includes(fileExt)) cacheControl = 'public, max-age=86400'; // 1 day
+    if (['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'].includes(fileExt)) {
+      cacheControl = 'public, max-age=604800'; // 7 days
+    }
+
+    const headers = { 'Content-Type': type, 'Cache-Control': cacheControl };
+
+    // Gzip compress text content if client supports it
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+    if (isText && acceptEncoding.includes('gzip') && data.length > 1024) {
+      zlib.gzip(data, (err, compressed) => {
+        if (err || !compressed) {
+          res.writeHead(statusCode, headers);
+          res.end(data);
+          return;
+        }
+        headers['Content-Encoding'] = 'gzip';
+        headers['Vary'] = 'Accept-Encoding';
+        res.writeHead(statusCode, headers);
+        res.end(compressed);
+      });
+      return;
+    }
+
+    res.writeHead(statusCode, headers);
+    res.end(data);
+  }
+
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
       // Try adding .html extension
@@ -603,11 +645,7 @@ const server = http.createServer(async (req, res) => {
         fs.access(htmlPath, fs.constants.F_OK, (htmlErr) => {
           if (!htmlErr) {
             fs.readFile(htmlPath, (readErr, data) => {
-              if (!readErr) {
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.end(data);
-                return;
-              }
+              if (!readErr) return sendFile(res, 200, data, 'text/html');
               handleFallbacks();
             });
           } else {
@@ -626,8 +664,7 @@ const server = http.createServer(async (req, res) => {
         res.end('Error reading file');
         return;
       }
-      res.writeHead(200, { 'Content-Type': contentType });
-      res.end(data);
+      sendFile(res, 200, data, contentType);
     });
   });
 
@@ -644,11 +681,7 @@ const server = http.createServer(async (req, res) => {
       fs.access(rootFilePath, fs.constants.F_OK, (fallbackErr) => {
         if (!fallbackErr) {
           fs.readFile(rootFilePath, (readErr, data) => {
-            if (!readErr) {
-              res.writeHead(200, { 'Content-Type': contentType });
-              res.end(data);
-              return;
-            }
+            if (!readErr) return sendFile(res, 200, data, contentType);
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('File not found: ' + pathname);
           });
