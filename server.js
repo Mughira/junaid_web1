@@ -33,8 +33,8 @@ const mailTransporter = process.env.SMTP_HOST
 // ---------------------------------------------------------------------------
 
 const mimeTypes = {
-  '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css',
-  '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
+  '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2',
   '.ttf': 'font/ttf', '.eot': 'application/vnd.ms-fontobject',
@@ -645,7 +645,7 @@ const server = http.createServer(async (req, res) => {
         fs.access(htmlPath, fs.constants.F_OK, (htmlErr) => {
           if (!htmlErr) {
             fs.readFile(htmlPath, (readErr, data) => {
-              if (!readErr) return sendFile(res, 200, data, 'text/html');
+              if (!readErr) return sendFile(res, 200, data, 'text/html; charset=utf-8');
               handleFallbacks();
             });
           } else {
